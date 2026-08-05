@@ -29,11 +29,9 @@
       <p>Famous works:</p>
       <ul>
         <!-- Activity 3.3: Render a list of all famous works. Hint: Use the v-for directive to iterate through the array of authors that you have filtered out. -->
-        <ul>
-          <li v-for="work in allFamousWorks" :key="work">
-            {{ work }}
-          </li>
-        </ul>
+        <li v-for="work in allFamousWorks" :key="work">
+          {{ work }}
+        </li>
       </ul>
 
       <h3>Finding in Arrays</h3>
@@ -94,6 +92,20 @@
       <!-- [OPTIONAL - NON ASSESSED] Activity 6: Attribute, Class and Style Bindings -->
       <h2>Attribute, Class and Style Binding with <code>v-bind</code></h2>
       <p>Highlighting Specific Authors:</p>
+
+      <ul>
+        <li
+          v-for="author in authors"
+          :key="author.id"
+          :title="`Author: ${author.name}`"
+          :class="{ highlight: author.name === 'George Orwell' }"
+          :style="{
+            fontWeight: author.name === 'George Orwell' ? 'bold' : 'normal',
+          }"
+        >
+          {{ author.name }} ({{ author.birthYear }})
+        </li>
+      </ul>
     </section>
   </div>
 </template>
@@ -116,6 +128,9 @@ const modernAuthors = computed(() => authors.filter((author) => author.birthYear
 const allFamousWorks = computed(() =>
   authors.flatMap((author) => author.famousWorks.map((work) => work.title)),
 )
+
+// efolio 2.2
+const orwell = computed(() => authors.find((author) => author.name === 'George Orwell'))
 </script>
 
 <style scoped>
