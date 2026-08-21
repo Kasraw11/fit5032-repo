@@ -8,7 +8,16 @@
           <div class="row mb-3">
             <div class="col-sm-6">
               <label for="username" class="form-label">Username</label>
-              <input type="text" class="form-control" id="username" v-model="formData.username" />
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                @blur="validateName(true)"
+                @input="validateName(false)"
+                v-model="formData.username"
+              />
+
+              <div v-if="errors.username" class="text-danger">{{ errors.username }}</div>
             </div>
 
             <div class="col-sm-6">
@@ -17,8 +26,13 @@
                 type="password"
                 class="form-control"
                 id="password"
+                @blur="validatePassword(true)"
+                @input="validatePassword(false)"
                 v-model="formData.password"
               />
+              <div v-if="errors.password" class="text-danger">
+                {{ errors.password }}
+              </div>
             </div>
           </div>
 
@@ -108,9 +122,14 @@ const formData = ref({
 const submittedCards = ref([])
 
 const submitForm = () => {
-  submittedCards.value.push({
-    ...formData.value,
-  })
+  validateName(true)
+  validatePassword(true)
+  if (!errors.value.username && !errors.value.password) {
+    submittedCards.value.push({
+      ...formData.value,
+    })
+    clearForm()
+  }
 }
 
 const clearForm = () => {
@@ -120,6 +139,45 @@ const clearForm = () => {
     isAustralian: false,
     reason: '',
     gender: '',
+  }
+}
+
+const errors = ref({
+  username: '',
+  password: '',
+  isAustralian: '',
+  reason: '',
+  gender: '',
+})
+
+const validateName = (blur) => {
+  if (formData.value.username.length < 3) {
+    if (blur) errors.value.username = 'Username must be at least 3 characters long.'
+  } else {
+    errors.value.username = ''
+  }
+}
+
+const validatePassword = (blur) => {
+  const password = formData.value.password
+  const minLength = 8
+  const hasUppercase = /[A-Z]/.test(password)
+  const hasLowercase = /[a-z]/.test(password)
+  const hasNumber = /\d/.test(password)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+
+  if (password.length < minLength) {
+    if (blur) errors.value.password = `Password must be at least ${minLength} characters long.`
+  } else if (!hasUppercase) {
+    if (blur) errors.value.password = 'Password must contain at least one uppercase letter.'
+  } else if (!hasLowercase) {
+    if (blur) errors.value.password = 'Password must contain at least one lowercase letter.'
+  } else if (!hasNumber) {
+    if (blur) errors.value.password = 'Password must contain at least one number.'
+  } else if (!hasSpecialChar) {
+    if (blur) errors.value.password = 'Password must contain at least one special character.'
+  } else {
+    errors.value.password = null
   }
 }
 </script>
