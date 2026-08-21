@@ -140,6 +140,14 @@ const clearForm = () => {
     reason: '',
     gender: '',
   }
+
+  errors.value = {
+    username: '',
+    password: '',
+    isAustralian: '',
+    reason: '',
+    gender: '',
+  }
 }
 
 const errors = ref({
