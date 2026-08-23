@@ -7,8 +7,9 @@ import EventsView from '../views/EventsView.vue'
 import LearnView from '../views/LearnView.vue'
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
-import AccountView from '../views/AccountView.vue'
+import LoginView from '../views/LoginView.vue'
 import AdminView from '../views/AdminView.vue'
+import SignUpView from '../views/SignUpView.vue'
 
 const routes = [
   {
@@ -48,8 +49,17 @@ const routes = [
   },
   {
     path: '/account',
-    name: 'account',
-    component: AccountView,
+    redirect: '/login',
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+  },
+  {
+    path: '/signup',
+    name: 'signup',
+    component: SignUpView,
   },
   {
     path: '/admin',
