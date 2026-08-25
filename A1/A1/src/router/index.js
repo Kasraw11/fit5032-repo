@@ -49,10 +49,10 @@ const routes = [
   },
   {
     path: '/account',
-    redirect: '/login',
+    redirect: '/account/login',
   },
   {
-    path: '/login',
+    path: '/account/login',
     name: 'login',
     component: LoginView,
   },

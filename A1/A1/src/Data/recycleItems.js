@@ -9,7 +9,6 @@ export const recycleItems = [
     recycle: 'Empty and rinse the bottle before placing it in the recycling bin.',
     disposal: 'If it cannot be recycled, place it in the general waste bin.',
   },
-
   {
     id: 2,
     name: 'Cardboard Box',
@@ -20,7 +19,6 @@ export const recycleItems = [
     recycle: 'Flatten the box before placing it in the recycling bin.',
     disposal: 'Wet or heavily contaminated cardboard should go in general waste.',
   },
-
   {
     id: 3,
     name: 'Glass Jar',
@@ -31,7 +29,6 @@ export const recycleItems = [
     recycle: 'Empty and rinse the jar before placing it in the recycling bin.',
     disposal: 'Broken glass should be wrapped safely and placed in general waste if required.',
   },
-
   {
     id: 4,
     name: 'Old Mobile Phone',
@@ -41,5 +38,66 @@ export const recycleItems = [
     repair: 'Consider replacing the battery, screen or other damaged parts.',
     recycle: 'Take the phone to an approved e-waste recycling collection point.',
     disposal: 'Do not place mobile phones in general household waste.',
+  },
+  {
+    id: 5,
+    name: 'Plastic Food Container',
+    category: 'Plastic',
+    details: 'A plastic container commonly used for takeaway food or food storage.',
+    reuse: 'Reuse it for storing food or organising small household items.',
+    repair: 'Cracked plastic containers are generally not suitable for repair.',
+    recycle: 'Clean the container and check whether your local recycling service accepts it.',
+    disposal: 'If it is heavily damaged or contaminated, place it in general waste.',
+  },
+  {
+    id: 6,
+    name: 'Newspaper',
+    category: 'Paper',
+    details: 'Printed paper commonly used for news and advertising.',
+    reuse: 'Reuse newspaper for wrapping, cleaning windows or craft projects.',
+    repair: 'Newspaper does not normally require repair.',
+    recycle: 'Place clean and dry newspaper in the paper recycling bin.',
+    disposal: 'Wet or heavily contaminated newspaper should go in general waste.',
+  },
+  {
+    id: 7,
+    name: 'Glass Bottle',
+    category: 'Glass',
+    details: 'A glass bottle commonly used for drinks and food products.',
+    reuse: 'Reuse it for storage, decoration or craft projects if it is undamaged.',
+    repair: 'Cracked or broken glass bottles should not be repaired.',
+    recycle: 'Empty and rinse the bottle before recycling.',
+    disposal:
+      'Broken glass should be wrapped safely before placing it in general waste if required.',
+  },
+  {
+    id: 8,
+    name: 'Old Laptop',
+    category: 'E-Waste',
+    details: 'A portable computer containing electronic components and recyclable materials.',
+    reuse: 'Donate or sell the laptop if it is still working.',
+    repair: 'Consider replacing the battery, storage drive, keyboard or screen.',
+    recycle: 'Take it to an approved e-waste recycling facility.',
+    disposal: 'Do not place laptops in household general waste.',
+  },
+  {
+    id: 9,
+    name: 'Plastic Shopping Bag',
+    category: 'Plastic',
+    details: 'A lightweight plastic bag commonly used for carrying shopping.',
+    reuse: 'Reuse it as a bin liner, storage bag or shopping bag.',
+    repair: 'Small tears may be repaired with tape for temporary reuse.',
+    recycle: 'Take soft plastics to a suitable collection point if one is available.',
+    disposal: 'Place it in general waste if no recycling option is available.',
+  },
+  {
+    id: 10,
+    name: 'Cereal Box',
+    category: 'Paper',
+    details: 'A lightweight cardboard box commonly used for packaged cereal.',
+    reuse: 'Reuse it for crafts, storage or organising documents.',
+    repair: 'Small tears can be repaired with paper tape.',
+    recycle: 'Flatten the box and place it in the paper recycling bin.',
+    disposal: 'Heavily contaminated cardboard should go in general waste.',
   },
 ]

@@ -2,7 +2,8 @@
   <main class="container mt-4">
     <div class="row justify-content-center">
       <div class="col-12 col-sm-6">
-        <h1>Sign Up</h1>
+        <h1>Create Account</h1>
+        <p class="mb-4 pt-2">Create a new account to get started.</p>
 
         <form @submit.prevent="submitForm" novalidate>
           <div class="mb-3">
@@ -64,6 +65,7 @@
               v-model="form.confirmPassword"
               type="password"
               class="form-control"
+              placeholder="Confirm your password"
               @blur="validateConfirmPassword(true)"
               @input="validateConfirmPassword(false)"
             />
@@ -73,7 +75,9 @@
             </p>
           </div>
 
-          <button type="submit" class="btn btn-primary">Sign Up</button>
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+          </div>
 
           <p v-if="successMessage" class="text-success mt-3">
             {{ successMessage }}
