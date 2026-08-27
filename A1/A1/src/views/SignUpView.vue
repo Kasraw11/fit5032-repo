@@ -1,5 +1,5 @@
 <template>
-  <main class="container mt-4">
+  <main class="container mt-4 pt-5">
     <div class="row justify-content-center">
       <div class="col-12 col-sm-6">
         <h1>Create Account</h1>
@@ -85,7 +85,7 @@
 
           <p class="mt-3">
             Already have an account?
-            <RouterLink to="/login">Login</RouterLink>
+            <RouterLink to="account/login">Login</RouterLink>
           </p>
         </form>
       </div>

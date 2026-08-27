@@ -25,7 +25,7 @@ const selectItem = (item) => {
 </script>
 
 <template>
-  <main class="container mt-4">
+  <main class="container mt-4 pt-5">
     <h1>Recycle & Reuse</h1>
 
     <div class="row mt-3 mb-4">
@@ -101,9 +101,8 @@ const selectItem = (item) => {
           </div>
 
           <div v-if="selectedItem" class="modal-body">
-            <p>
-              <strong>Category:</strong>
-              {{ selectedItem.category }}
+            <p class="text-center">
+              <strong>{{ selectedItem.category }}</strong>
             </p>
 
             <h3 class="h6">Item Details</h3>
@@ -120,10 +119,6 @@ const selectItem = (item) => {
 
             <h3 class="h6">Disposal Instructions</h3>
             <p>{{ selectedItem.disposal }}</p>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
