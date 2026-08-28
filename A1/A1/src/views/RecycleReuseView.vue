@@ -76,7 +76,15 @@ const selectItem = (item) => {
               {{ item.details }}
             </p>
 
-            <span class="text-primary"> View details </span>
+            <button
+              type="button"
+              class="btn btn-outline-primary w-20 mt-2"
+              data-bs-toggle="modal"
+              data-bs-target="#itemDetailsModal"
+              @click="selectItem(item)"
+            >
+              View details
+            </button>
           </div>
         </div>
       </div>
