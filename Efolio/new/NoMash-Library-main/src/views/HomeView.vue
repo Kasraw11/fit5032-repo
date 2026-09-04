@@ -79,7 +79,6 @@ const validatePassword = (blur) => {
     errors.value.password = null
   }
 
-  // Re-check confirm password if the user has already entered it
   if (formData.value.confirmPassword) {
     validateConfirmPassword(blur)
   }
@@ -158,9 +157,7 @@ const clearForm = () => {
         </p>
 
         <form @submit.prevent="submitForm">
-          <!-- Username, Password and Confirm Password -->
           <div class="row mb-3">
-            <!-- Username -->
             <div class="col-md-4 mb-3">
               <label for="username" class="form-label"> Username </label>
 
@@ -178,7 +175,6 @@ const clearForm = () => {
               </div>
             </div>
 
-            <!-- Password -->
             <div class="col-md-5 mb-3">
               <label for="gender" class="form-label"> Gender </label>
 
@@ -235,9 +231,7 @@ const clearForm = () => {
             </div>
           </div>
 
-          <!-- Australian Resident and Gender -->
           <div class="row mb-3">
-            <!-- Australian Resident -->
             <div class="col-md-6 mb-3">
               <div class="form-check mt-4">
                 <input
@@ -250,11 +244,8 @@ const clearForm = () => {
                 <label class="form-check-label" for="isAustralian"> Australian Resident? </label>
               </div>
             </div>
-
-            <!-- Gender -->
           </div>
 
-          <!-- Reason -->
           <div class="mb-3">
             <label for="reason" class="form-label"> Reason for joining </label>
 
@@ -272,7 +263,6 @@ const clearForm = () => {
             <input type="text" class="form-control" id="suburb" v-bind:value="formData.suburb" />
           </div>
 
-          <!-- Buttons -->
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
 
@@ -282,7 +272,6 @@ const clearForm = () => {
       </div>
     </div>
 
-    <!-- PrimeVue DataTable -->
     <div class="row mt-5">
       <div class="col-12">
         <h4>This is a PrimeVue DataTable.</h4>
@@ -303,7 +292,6 @@ const clearForm = () => {
       </div>
     </div>
 
-    <!-- User Cards -->
     <div v-if="submittedCards.length" class="row mt-5">
       <div class="col-12">
         <h4>Registered Users</h4>
