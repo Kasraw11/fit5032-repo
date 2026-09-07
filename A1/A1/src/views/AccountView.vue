@@ -1,9 +1,10 @@
 <template>
-  <main class="container mt-4 pt-5">
-    <h1>Account</h1>
-
-    <div class="text-center mt-4">
-      <h2>Login or sign up</h2>
-    </div>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Account</h1>
+        <p>Log in or sign up to access your SmartLoop account.</p>
+      </div>
+    </section>
   </main>
 </template>

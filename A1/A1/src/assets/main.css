@@ -10,3 +10,23 @@ body {
   width: 100%;
   min-height: 100vh;
 }
+
+.page-hero {
+  background-color: #244d87;
+  color: #ffffff;
+  min-height: 350px;
+  padding: 5rem 1rem;
+  text-align: center;
+}
+
+.page-hero h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+}
+
+.page-hero p {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin: 4rem auto 0;
+  max-width: 720px;
+}

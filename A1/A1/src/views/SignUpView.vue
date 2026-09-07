@@ -1,10 +1,15 @@
 <template>
-  <main class="container mt-4 pt-5">
-    <div class="row justify-content-center">
-      <div class="col-12 col-sm-6">
+  <main>
+    <section class="page-hero">
+      <div class="container">
         <h1>Create Account</h1>
-        <p class="mb-4 pt-2">Create a new account to get started.</p>
+        <p>Create a new SmartLoop account to get started.</p>
+      </div>
+    </section>
 
+    <div class="container py-5">
+      <div class="row justify-content-center">
+      <div class="col-12 col-sm-6">
         <form @submit.prevent="submitForm" novalidate>
           <div class="mb-3">
             <label for="name" class="form-label">Name</label>
@@ -88,6 +93,7 @@
             <RouterLink to="account/login">Login</RouterLink>
           </p>
         </form>
+      </div>
       </div>
     </div>
   </main>

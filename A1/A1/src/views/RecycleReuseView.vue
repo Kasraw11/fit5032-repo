@@ -25,10 +25,16 @@ const selectItem = (item) => {
 </script>
 
 <template>
-  <main class="container mt-4 pt-5">
-    <h1>Recycle & Reuse</h1>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Recycle & Reuse</h1>
+        <p>Search for practical ways to recycle, reuse, repair, and dispose of items correctly.</p>
+      </div>
+    </section>
 
-    <div class="row mt-3 mb-4">
+    <div class="container py-5">
+      <div class="row mb-4">
       <div class="col-12 col-sm-6 mb-3">
         <label for="search" class="form-label"> Search item </label>
 
@@ -54,7 +60,7 @@ const selectItem = (item) => {
       </div>
     </div>
 
-    <div class="row">
+      <div class="row">
       <div v-for="item in filteredItems" :key="item.id" class="col-12 col-sm-6 mb-3">
         <div
           class="card h-100 item-card"
@@ -90,9 +96,9 @@ const selectItem = (item) => {
       </div>
     </div>
 
-    <p v-if="filteredItems.length === 0">No items found.</p>
+      <p v-if="filteredItems.length === 0">No items found.</p>
 
-    <div id="itemDetailsModal" class="modal fade" tabindex="-1" aria-hidden="true">
+      <div id="itemDetailsModal" class="modal fade" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -129,6 +135,7 @@ const selectItem = (item) => {
             <p>{{ selectedItem.disposal }}</p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </main>

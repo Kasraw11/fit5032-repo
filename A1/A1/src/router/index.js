@@ -8,7 +8,10 @@ import LearnView from '../views/LearnView.vue'
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
-import AdminView from '../views/AdminView.vue'
+import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
+import AdminUsersView from '../views/admin/AdminUsersView.vue'
+import AdminEventsView from '../views/admin/AdminEventsView.vue'
+import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import SignUpView from '../views/SignUpView.vue'
 
 const routes = [
@@ -64,7 +67,22 @@ const routes = [
   {
     path: '/admin',
     name: 'admin',
-    component: AdminView,
+    component: AdminDashboardView,
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: AdminUsersView,
+  },
+  {
+    path: '/admin/events',
+    name: 'admin-events',
+    component: AdminEventsView,
+  },
+  {
+    path: '/admin/locations',
+    name: 'admin-locations',
+    component: AdminLocationsView,
   },
 ]
 

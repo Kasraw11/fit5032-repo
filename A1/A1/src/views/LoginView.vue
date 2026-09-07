@@ -1,11 +1,16 @@
 <template>
-  <main class="container mt-4 pt-5">
-    <div class="row justify-content-center">
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <h1>Login</h1>
+        <p>Access your SmartLoop account.</p>
+      </div>
+    </section>
+
+    <div class="container py-5">
+      <div class="row justify-content-center">
       <div class="col-12 col-sm-8 col-md-6 col-lg-4">
         <div class="login-box">
-          <h1>Login</h1>
-          <p class="login-subtitle">Access to your SmartLoop account</p>
-
           <form @submit.prevent="submitForm" novalidate>
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
@@ -33,6 +38,7 @@
             </p>
           </form>
         </div>
+      </div>
       </div>
     </div>
   </main>
