@@ -44,6 +44,24 @@
           <li class="nav-item mx-2">
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
+
+          <li class="nav-item dropdown mx-2">
+            <button
+              class="nav-link dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Admin
+            </button>
+
+            <ul class="dropdown-menu">
+              <li><RouterLink class="dropdown-item" to="/admin">Dashboard</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/admin/users">Users</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/admin/events">Events</RouterLink></li>
+              <li><RouterLink class="dropdown-item" to="/admin/locations">Locations</RouterLink></li>
+            </ul>
+          </li>
         </ul>
 
         <RouterLink class="btn btn-outline-primary btn-sm" to="/account"> Account </RouterLink>
