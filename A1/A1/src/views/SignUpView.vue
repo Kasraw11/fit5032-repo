@@ -101,6 +101,9 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = reactive({
   name: '',
@@ -193,7 +196,31 @@ const submitForm = () => {
   validateConfirmPassword(true)
 
   if (!errors.name && !errors.email && !errors.password && !errors.confirmPassword) {
+    const users = JSON.parse(localStorage.getItem('users')) || []
+    const email = form.email.trim().toLowerCase()
+    const userAlreadyExists = users.some((user) => user.email.toLowerCase() === email)
+
+    if (userAlreadyExists) {
+      errors.email = 'An account with this email already exists.'
+      return
+    }
+
+    const newUserId = users.length + 1
+    const newUser = {
+      id: newUserId,
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      role: 'user',
+    }
+
+    users.push(newUser)
+    localStorage.setItem('users', JSON.stringify(users))
     successMessage.value = ` Welcome! ${form.name}, your registration was successful.`
+
+    setTimeout(() => {
+      router.push({ name: 'login' })
+    }, 1000)
   }
 }
 </script>
