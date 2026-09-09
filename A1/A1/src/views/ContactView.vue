@@ -7,7 +7,12 @@
       </div>
     </section>
 
-    <form class="mx-auto my-5" style="max-width: 600px" novalidate @submit.prevent="submitForm">
+    <form
+      class="form-card mx-auto my-5"
+      style="max-width: 600px"
+      novalidate
+      @submit.prevent="submitForm"
+    >
       <div class="mb-3">
         <label for="subject" class="form-label">Subject</label>
         <input

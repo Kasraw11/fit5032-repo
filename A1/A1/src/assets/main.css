@@ -4,6 +4,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
 }
 
 #app {
@@ -14,19 +15,51 @@ body {
 .page-hero {
   background-color: #244d87;
   color: #ffffff;
-  min-height: 350px;
-  padding: 5rem 1rem;
+  padding: 3.5rem 1rem;
   text-align: center;
 }
 
 .page-hero h1 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
   font-weight: 700;
+  margin-bottom: 0;
 }
 
 .page-hero p {
-  font-size: 1.2rem;
-  line-height: 1.8;
-  margin: 4rem auto 0;
+  font-size: 1.1rem;
+  margin: 0.75rem auto 0;
   max-width: 720px;
+}
+
+.card,
+.form-card {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+}
+
+.form-card {
+  padding: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  border-color: var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.btn {
+  border-radius: 0.8rem;
+  font-weight: 500;
+}
+
+@media (max-width: 576px) {
+  .page-hero {
+    padding: 2.75rem 1rem;
+  }
 }

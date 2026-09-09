@@ -10,7 +10,7 @@
     <div class="container py-5">
       <div class="row justify-content-center">
         <div class="col-12 col-sm-6">
-          <form @submit.prevent="submitForm" novalidate>
+          <form class="form-card" @submit.prevent="submitForm" novalidate>
             <div class="mb-3">
               <label for="name" class="form-label">Name</label>
 

@@ -11,7 +11,7 @@
       <div class="row justify-content-center">
       <div class="col-12 col-sm-8 col-md-6 col-lg-4">
         <div class="login-box">
-          <form @submit.prevent="submitForm" novalidate>
+          <form class="form-card" @submit.prevent="submitForm" novalidate>
             <div class="mb-3">
               <label for="email" class="form-label">Email</label>
 

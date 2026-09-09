@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Community Clean-Up Day",
+    "date": "20 September 2026",
+    "location": "Riverside Park",
+    "description": "Help collect litter and keep our local park clean."
+  },
+  {
+    "id": 2,
+    "name": "Recycling Workshop",
+    "date": "27 September 2026",
+    "location": "Community Centre",
+    "description": "Learn how to recycle common household items correctly."
+  }
+]

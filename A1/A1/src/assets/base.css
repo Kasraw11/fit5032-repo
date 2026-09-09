@@ -1,12 +1,12 @@
 :root {
   --primary-color: #0d6efd;
-  --background-color: #e7f2fc;
+  --background-color: #f6f8fb;
   --text-color: #222222;
   --muted-color: #6c757d;
   --border-color: #d9e2ea;
   --white: #ffffff;
-  --navbar-background-color: #c4ddf5;
-  --navbar-border-color: #c6c8cc98;
+  --navbar-background-color: #ffffff;
+  --navbar-border-color: #d9e2ea;
 }
 
 * {

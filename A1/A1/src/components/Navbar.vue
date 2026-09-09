@@ -59,7 +59,9 @@
               <li><RouterLink class="dropdown-item" to="/admin">Dashboard</RouterLink></li>
               <li><RouterLink class="dropdown-item" to="/admin/users">Users</RouterLink></li>
               <li><RouterLink class="dropdown-item" to="/admin/events">Events</RouterLink></li>
-              <li><RouterLink class="dropdown-item" to="/admin/locations">Locations</RouterLink></li>
+              <li>
+                <RouterLink class="dropdown-item" to="/admin/locations">Locations</RouterLink>
+              </li>
             </ul>
           </li>
         </ul>
@@ -75,7 +77,7 @@
           <RouterLink class="btn btn-outline-primary btn-sm" to="/account/login">
             Login
           </RouterLink>
-          <RouterLink class="btn btn-primary btn-sm" to="/signup">Register</RouterLink>
+          <RouterLink class="btn btn-primary btn-sm" to="/signup">Sign Up</RouterLink>
         </div>
       </div>
     </div>
@@ -107,24 +109,26 @@ const logout = () => {
 <style scoped>
 .smartloop-navbar {
   background-color: var(--navbar-background-color);
-  border-bottom: 5px solid var(--navbar-border-color);
-
+  border-bottom: 1px solid var(--navbar-border-color);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 0.75rem 0;
 }
 
 .navbar-brand {
-  font-size: 24px;
-  font-weight: 600;
+  color: #244d87;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .nav-link {
-  font-size: 17px;
+  color: #374151;
+  font-size: 1rem;
   font-weight: 500;
-  margin: 0 6px;
+  margin: 0 0.15rem;
 }
 
 .nav-link.router-link-active {
-  font-weight: 600;
-  color: #0866f3;
+  color: #0d6efd;
+  font-weight: 700;
 }
 </style>
