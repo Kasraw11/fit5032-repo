@@ -64,11 +64,45 @@
           </li>
         </ul>
 
-        <RouterLink class="btn btn-outline-primary btn-sm" to="/account"> Account </RouterLink>
+        <div v-if="currentUser" class="d-flex gap-2">
+          <RouterLink class="btn btn-outline-primary btn-sm" to="/account">Account</RouterLink>
+          <button type="button" class="btn btn-outline-danger btn-sm" @click="logout">
+            Logout
+          </button>
+        </div>
+
+        <div v-else class="d-flex gap-2">
+          <RouterLink class="btn btn-outline-primary btn-sm" to="/account/login">
+            Login
+          </RouterLink>
+          <RouterLink class="btn btn-primary btn-sm" to="/signup">Register</RouterLink>
+        </div>
       </div>
     </div>
   </nav>
 </template>
+
+<script setup>
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
+
+watch(
+  () => route.path,
+  () => {
+    currentUser.value = JSON.parse(sessionStorage.getItem('currentUser'))
+  },
+)
+
+const logout = () => {
+  sessionStorage.removeItem('currentUser')
+  currentUser.value = null
+  router.push('/account/login')
+}
+</script>
 
 <style scoped>
 .smartloop-navbar {

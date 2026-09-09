@@ -8,6 +8,7 @@ import LearnView from '../views/LearnView.vue'
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
+import AccountView from '../views/AccountView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminEventsView from '../views/admin/AdminEventsView.vue'
@@ -52,7 +53,9 @@ const routes = [
   },
   {
     path: '/account',
-    redirect: '/account/login',
+    name: 'account',
+    component: AccountView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/account/login',
@@ -89,6 +92,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresAuth && !sessionStorage.getItem('currentUser')) {
+    return '/account/login'
+  }
 })
 
 export default router

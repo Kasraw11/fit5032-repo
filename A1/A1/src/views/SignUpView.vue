@@ -9,91 +9,91 @@
 
     <div class="container py-5">
       <div class="row justify-content-center">
-      <div class="col-12 col-sm-6">
-        <form @submit.prevent="submitForm" novalidate>
-          <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
+        <div class="col-12 col-sm-6">
+          <form @submit.prevent="submitForm" novalidate>
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
 
-            <input
-              id="name"
-              v-model="form.name"
-              type="text"
-              class="form-control"
-              @blur="validateName(true)"
-              @input="validateName(false)"
-            />
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                class="form-control"
+                @blur="validateName(true)"
+                @input="validateName(false)"
+              />
 
-            <p v-if="errors.name" class="text-danger mt-1">
-              {{ errors.name }}
+              <p v-if="errors.name" class="text-danger mt-1">
+                {{ errors.name }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="form-control"
+                @blur="validateEmail(true)"
+                @input="validateEmail(false)"
+              />
+
+              <p v-if="errors.email" class="text-danger mt-1">
+                {{ errors.email }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+
+              <input
+                id="password"
+                v-model="form.password"
+                type="password"
+                class="form-control"
+                @blur="validatePassword(true)"
+                @input="validatePassword(false)"
+              />
+
+              <p v-if="errors.password" class="text-danger mt-1">
+                {{ errors.password }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label"> Confirm Password </label>
+
+              <input
+                id="confirmPassword"
+                v-model="form.confirmPassword"
+                type="password"
+                class="form-control"
+                placeholder="Confirm your password"
+                @blur="validateConfirmPassword(true)"
+                @input="validateConfirmPassword(false)"
+              />
+
+              <p v-if="errors.confirmPassword" class="text-danger mt-1">
+                {{ errors.confirmPassword }}
+              </p>
+            </div>
+
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Sign Up</button>
+            </div>
+
+            <p v-if="successMessage" class="text-success mt-3">
+              {{ successMessage }}
             </p>
-          </div>
 
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-
-            <input
-              id="email"
-              v-model="form.email"
-              type="email"
-              class="form-control"
-              @blur="validateEmail(true)"
-              @input="validateEmail(false)"
-            />
-
-            <p v-if="errors.email" class="text-danger mt-1">
-              {{ errors.email }}
+            <p class="mt-3">
+              have an account?
+              <RouterLink to="account/login">Login</RouterLink>
             </p>
-          </div>
-
-          <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-
-            <input
-              id="password"
-              v-model="form.password"
-              type="password"
-              class="form-control"
-              @blur="validatePassword(true)"
-              @input="validatePassword(false)"
-            />
-
-            <p v-if="errors.password" class="text-danger mt-1">
-              {{ errors.password }}
-            </p>
-          </div>
-
-          <div class="mb-3">
-            <label for="confirmPassword" class="form-label"> Confirm Password </label>
-
-            <input
-              id="confirmPassword"
-              v-model="form.confirmPassword"
-              type="password"
-              class="form-control"
-              placeholder="Confirm your password"
-              @blur="validateConfirmPassword(true)"
-              @input="validateConfirmPassword(false)"
-            />
-
-            <p v-if="errors.confirmPassword" class="text-danger mt-1">
-              {{ errors.confirmPassword }}
-            </p>
-          </div>
-
-          <div class="text-center">
-            <button type="submit" class="btn btn-primary">Sign Up</button>
-          </div>
-
-          <p v-if="successMessage" class="text-success mt-3">
-            {{ successMessage }}
-          </p>
-
-          <p class="mt-3">
-            Already have an account?
-            <RouterLink to="account/login">Login</RouterLink>
-          </p>
-        </form>
-      </div>
+          </form>
+        </div>
       </div>
     </div>
   </main>
@@ -197,10 +197,11 @@ const submitForm = () => {
 
   if (!errors.name && !errors.email && !errors.password && !errors.confirmPassword) {
     const users = JSON.parse(localStorage.getItem('users')) || []
-    const email = form.email.trim().toLowerCase()
-    const userAlreadyExists = users.some((user) => user.email.toLowerCase() === email)
+    const emailExists = users.some(
+      (user) => user.email.toLowerCase() === form.email.trim().toLowerCase(),
+    )
 
-    if (userAlreadyExists) {
+    if (emailExists) {
       errors.email = 'An account with this email already exists.'
       return
     }

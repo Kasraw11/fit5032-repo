@@ -30,6 +30,10 @@
               </p>
             </div>
 
+            <p v-if="loginError" class="text-danger">
+              {{ loginError }}
+            </p>
+
             <button type="submit" class="btn btn-primary w-100">Login</button>
 
             <p class="account-link">
@@ -45,7 +49,10 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = reactive({
   email: '',
@@ -57,9 +64,12 @@ const errors = reactive({
   password: '',
 })
 
+const loginError = ref('')
+
 const submitForm = () => {
   errors.email = ''
   errors.password = ''
+  loginError.value = ''
 
   if (!form.email.trim()) {
     errors.email = 'Email is required.'
@@ -70,7 +80,24 @@ const submitForm = () => {
   }
 
   if (!errors.email && !errors.password) {
-    console.log('Login form is valid')
+    const users = JSON.parse(localStorage.getItem('users')) || []
+    const email = form.email.trim().toLowerCase()
+    const user = users.find((user) => user.email.toLowerCase() === email)
+
+    if (!user || user.password !== form.password) {
+      loginError.value = 'Invalid email or password.'
+      return
+    }
+
+    const currentUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    }
+
+    sessionStorage.setItem('currentUser', JSON.stringify(currentUser))
+    router.push('/account')
   }
 }
 </script>
