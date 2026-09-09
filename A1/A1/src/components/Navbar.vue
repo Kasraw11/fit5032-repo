@@ -45,7 +45,7 @@
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
 
-          <li class="nav-item dropdown mx-2">
+          <li v-if="currentUser && currentUser.role === 'admin'" class="nav-item dropdown mx-2">
             <button
               class="nav-link dropdown-toggle"
               type="button"

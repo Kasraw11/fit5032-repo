@@ -71,21 +71,25 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: AdminDashboardView,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/admin/users',
     name: 'admin-users',
     component: AdminUsersView,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/admin/events',
     name: 'admin-events',
     component: AdminEventsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: '/admin/locations',
     name: 'admin-locations',
     component: AdminLocationsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
   },
 ]
 
@@ -95,8 +99,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !sessionStorage.getItem('currentUser')) {
+  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'))
+
+  if (to.meta.requiresAuth && !currentUser) {
     return '/account/login'
+  }
+
+  if (to.meta.requiresAdmin && currentUser.role !== 'admin') {
+    return '/account'
   }
 })
 
