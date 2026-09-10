@@ -35,6 +35,7 @@ const routes = [
     path: '/events',
     name: 'events',
     component: EventsView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/learn',

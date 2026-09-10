@@ -17,20 +17,31 @@
               <p class="card-text"><strong>Location:</strong> {{ event.location }}</p>
               <p class="card-text">{{ event.description }}</p>
 
-              <p class="mb-2">Rate event:</p>
-              <button
-                v-for="rating in 5"
-                :key="rating"
-                type="button"
-                class="btn btn-outline-primary me-2"
-                @click="rateEvent(event.id, rating)"
-              >
-                {{ rating }}
-              </button>
+              <div class="mt-4">
+                <label :for="`rating-${event.id}`" class="form-label">Rating:</label>
+                <select
+                  :id="`rating-${event.id}`"
+                  v-model="selectedRatings[event.id]"
+                  class="form-select mb-3"
+                >
+                  <option value="">Choose a rating</option>
+                  <option v-for="rating in 5" :key="rating" :value="rating">
+                    {{ rating }}
+                  </option>
+                </select>
 
-              <p v-if="ratings[event.id]" class="text-success mt-3 mb-0">
-                You rated this event {{ ratings[event.id] }}/5.
-              </p>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  @click="submitRating(event.id)"
+                >
+                  Submit Rating
+                </button>
+
+                <p v-if="messages[event.id]" class="mt-3 mb-0">
+                  {{ messages[event.id] }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -40,14 +51,41 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { ref } from 'vue'
 import events from '../data/event.json'
 
-const savedRatings = JSON.parse(localStorage.getItem('eventRatings')) || {}
-const ratings = reactive(savedRatings)
+const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
+const selectedRatings = ref({})
+const messages = ref({})
 
-const rateEvent = (eventId, rating) => {
-  ratings[eventId] = rating
-  localStorage.setItem('eventRatings', JSON.stringify(ratings))
+const submitRating = (eventId) => {
+  const rating = Number(selectedRatings.value[eventId])
+
+  if (rating < 1 || rating > 5) {
+    messages.value[eventId] = 'Please select a rating from 1 to 5.'
+    return
+  }
+
+  const ratings = JSON.parse(localStorage.getItem('ratings')) || []
+  const existingRatingIndex = ratings.findIndex(
+    (savedRating) =>
+      savedRating.eventId === eventId && savedRating.userId === currentUser.value.id,
+  )
+
+  const ratingToSave = {
+    eventId: eventId,
+    userId: currentUser.value.id,
+    rating: rating,
+  }
+
+  if (existingRatingIndex === -1) {
+    ratings.push(ratingToSave)
+    messages.value[eventId] = 'Your rating has been saved.'
+  } else {
+    ratings[existingRatingIndex] = ratingToSave
+    messages.value[eventId] = 'Your rating has been updated.'
+  }
+
+  localStorage.setItem('ratings', JSON.stringify(ratings))
 }
 </script>
