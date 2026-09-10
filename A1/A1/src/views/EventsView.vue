@@ -17,6 +17,15 @@
               <p class="card-text"><strong>Location:</strong> {{ event.location }}</p>
               <p class="card-text">{{ event.description }}</p>
 
+              <p class="mb-1">
+                <strong>Average Rating: </strong>
+                <span v-if="getRatingCount(event.id) > 0">
+                  {{ getAverageRating(event.id) }}
+                </span>
+                <span v-else>No ratings yet</span>
+              </p>
+              <p class="mb-0">reviews: {{ getRatingCount(event.id) }}</p>
+
               <div class="mt-4">
                 <label :for="`rating-${event.id}`" class="form-label">Rating:</label>
                 <select
@@ -30,11 +39,7 @@
                   </option>
                 </select>
 
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  @click="submitRating(event.id)"
-                >
+                <button type="button" class="btn btn-primary" @click="submitRating(event.id)">
                   Submit Rating
                 </button>
 
@@ -57,6 +62,22 @@ import events from '../data/event.json'
 const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
 const selectedRatings = ref({})
 const messages = ref({})
+const ratings = ref(JSON.parse(localStorage.getItem('ratings')) || [])
+
+const getEventRatings = (eventId) => {
+  return ratings.value.filter((rating) => rating.eventId === eventId)
+}
+
+const getAverageRating = (eventId) => {
+  const eventRatings = getEventRatings(eventId)
+  const total = eventRatings.reduce((sum, rating) => sum + rating.rating, 0)
+
+  return (total / eventRatings.length).toFixed(1)
+}
+
+const getRatingCount = (eventId) => {
+  return getEventRatings(eventId).length
+}
 
 const submitRating = (eventId) => {
   const rating = Number(selectedRatings.value[eventId])
@@ -66,10 +87,8 @@ const submitRating = (eventId) => {
     return
   }
 
-  const ratings = JSON.parse(localStorage.getItem('ratings')) || []
-  const existingRatingIndex = ratings.findIndex(
-    (savedRating) =>
-      savedRating.eventId === eventId && savedRating.userId === currentUser.value.id,
+  const existingRatingIndex = ratings.value.findIndex(
+    (savedRating) => savedRating.eventId === eventId && savedRating.userId === currentUser.value.id,
   )
 
   const ratingToSave = {
@@ -79,13 +98,13 @@ const submitRating = (eventId) => {
   }
 
   if (existingRatingIndex === -1) {
-    ratings.push(ratingToSave)
+    ratings.value.push(ratingToSave)
     messages.value[eventId] = 'Your rating has been saved.'
   } else {
-    ratings[existingRatingIndex] = ratingToSave
+    ratings.value[existingRatingIndex] = ratingToSave
     messages.value[eventId] = 'Your rating has been updated.'
   }
 
-  localStorage.setItem('ratings', JSON.stringify(ratings))
+  localStorage.setItem('ratings', JSON.stringify(ratings.value))
 }
 </script>
