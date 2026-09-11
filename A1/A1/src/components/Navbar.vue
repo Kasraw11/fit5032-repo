@@ -45,24 +45,8 @@
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
 
-          <li v-if="currentUser && currentUser.role === 'admin'" class="nav-item dropdown mx-2">
-            <button
-              class="nav-link dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Admin
-            </button>
-
-            <ul class="dropdown-menu">
-              <li><RouterLink class="dropdown-item" to="/admin">Dashboard</RouterLink></li>
-              <li><RouterLink class="dropdown-item" to="/admin/users">Users</RouterLink></li>
-              <li><RouterLink class="dropdown-item" to="/admin/events">Events</RouterLink></li>
-              <li>
-                <RouterLink class="dropdown-item" to="/admin/locations">Locations</RouterLink>
-              </li>
-            </ul>
+          <li v-if="currentUser && currentUser.role === 'admin'" class="nav-item mx-2">
+            <RouterLink class="nav-link" to="/admin">Admin Dashboard</RouterLink>
           </li>
         </ul>
 

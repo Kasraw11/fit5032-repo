@@ -1,11 +1,10 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Create Account</h1>
-        <p>Create a new SmartLoop account to get started.</p>
-      </div>
-    </section>
+    <PageHero
+      title="Welcome"
+      subtitle="Create a new SmartLoop account to get started."
+      :image="sign_hero"
+    />
 
     <div class="container py-5">
       <div class="row justify-content-center">
@@ -102,6 +101,8 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import PageHero from '@/components/PageHero.vue'
+import sign_hero from '@/assets/images/sign_hero.png'
 
 const router = useRouter()
 

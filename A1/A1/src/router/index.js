@@ -13,6 +13,12 @@ import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminEventsView from '../views/admin/AdminEventsView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
+import AdminOverviewView from '../views/admin/AdminOverviewView.vue'
+import AdminStatsView from '../views/admin/AdminStatsView.vue'
+import AdminSettingsView from '../views/admin/AdminSettingsView.vue'
+import AdminNotificationsView from '../views/admin/AdminNotificationsView.vue'
+import AdminInboxView from '../views/admin/AdminInboxView.vue'
+import AdminPageManagementView from '../views/admin/AdminPageManagementView.vue'
 import SignUpView from '../views/SignUpView.vue'
 
 const routes = [
@@ -90,6 +96,42 @@ const routes = [
     path: '/admin/locations',
     name: 'admin-locations',
     component: AdminLocationsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/overview',
+    name: 'admin-overview',
+    component: AdminOverviewView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/stats',
+    name: 'admin-stats',
+    component: AdminStatsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: AdminSettingsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/notifications',
+    name: 'admin-notifications',
+    component: AdminNotificationsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/inbox',
+    name: 'admin-inbox',
+    component: AdminInboxView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/pageManagement',
+    name: 'admin-page-management',
+    component: AdminPageManagementView,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
 ]
