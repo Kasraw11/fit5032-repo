@@ -1,11 +1,10 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Dashboard</h1>
-        <p>This page will provide an overview of admin activity.</p>
-      </div>
-    </section>
+    <PageHero
+      title="Admin Dashboard"
+      subtitle="Welcome to the admin dashboard. Here you can manage users, events, and other administrative tasks."
+      :image="admin"
+    />
 
     <section class="container py-5">
       <div class="row g-4 mt-2">
@@ -118,3 +117,10 @@
     </section>
   </main>
 </template>
+
+<script setup>
+const currentUser = JSON.parse(sessionStorage.getItem('currentUser'))
+
+import PageHero from '@/components/PageHero.vue'
+import admin from '@/assets/images/admin.png'
+</script>

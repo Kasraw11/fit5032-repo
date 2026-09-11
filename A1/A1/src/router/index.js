@@ -5,6 +5,8 @@ import RecycleReuseView from '../views/RecycleReuseView.vue'
 import MapView from '../views/MapView.vue'
 import EventsView from '../views/EventsView.vue'
 import LearnView from '../views/LearnView.vue'
+import LearnRulesView from '../views/LearnRulesView.vue'
+import LearnDonationView from '../views/LearnDonationView.vue'
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -47,6 +49,16 @@ const routes = [
     path: '/learn',
     name: 'learn',
     component: LearnView,
+  },
+  {
+    path: '/learn/rules',
+    name: 'learn-rules',
+    component: LearnRulesView,
+  },
+  {
+    path: '/learn/donation',
+    name: 'learn-donation',
+    component: LearnDonationView,
   },
   {
     path: '/contact',

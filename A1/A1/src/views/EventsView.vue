@@ -1,11 +1,10 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Events</h1>
-        <p>Browse, register for, and manage sustainability events.</p>
-      </div>
-    </section>
+    <PageHero
+      title="Events"
+      subtitle="Browse, register for, and manage sustainability events."
+      :image="events_hero"
+    />
 
     <section class="container py-5">
       <div class="row g-4">
@@ -58,6 +57,8 @@
 <script setup>
 import { ref } from 'vue'
 import events from '../data/event.json'
+import PageHero from '@/components/PageHero.vue'
+import events_hero from '@/assets/images/events_hero.png'
 
 const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
 const selectedRatings = ref({})

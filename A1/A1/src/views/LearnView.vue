@@ -1,10 +1,40 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Learn</h1>
-        <p>Explore recycling rules, waste reduction, reuse, donation, and the circular economy.</p>
+    <PageHero
+      title="Learn"
+      subtitle="Explore recycling rules and donation information."
+      :image="learn_hero"
+    />
+
+    <section class="container py-5">
+      <div class="row g-4">
+        <div class="col-12 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h4">Recycling Rules</h2>
+              <p>View and learn about recycling rules.</p>
+              <RouterLink class="btn btn-primary" to="/learn/rules">View Rules</RouterLink>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h4">Donation</h2>
+              <p>Learn which items can be donated.</p>
+              <RouterLink class="btn btn-primary" to="/learn/donation">
+                View Donation Info
+              </RouterLink>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 </template>
+
+<script setup>
+import PageHero from '@/components/PageHero.vue'
+import learn_hero from '@/assets/images/learn_hero.png'
+</script>

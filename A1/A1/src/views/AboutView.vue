@@ -1,13 +1,26 @@
 <template>
   <main class="about-page">
-    <section class="page-hero">
-      <div class="container">
-        <h1>About us</h1>
-        <p>
-          This is a simple web application that allows users to log in and sign up for an account.
-          It also provides a feature to recycle and reuse items.
-        </p>
+    <PageHero
+      title="About Us"
+      subtitle="Learn more about our mission and commitment to sustainability."
+      :image="about_hero"
+    />
+
+    <section class="container py-5">
+      <div class="card shadow-sm mx-auto" style="max-width: 800px">
+        <div class="card-body p-4">
+          <h2 class="h4 card-title">Our Mission</h2>
+          <p class="card-text mb-0">
+            SmartLoop helps the community reduce waste, reuse everyday items, and recycle correctly.
+            We provide practical information that makes sustainable choices easier for everyone.
+          </p>
+        </div>
       </div>
     </section>
   </main>
 </template>
+
+<script setup>
+import PageHero from '@/components/PageHero.vue'
+import about_hero from '@/assets/images/about_hero.png'
+</script>

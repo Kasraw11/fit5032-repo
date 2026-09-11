@@ -1,11 +1,10 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Contact us</h1>
-        <p>Get in touch about collaboration, support, or SmartLoop.</p>
-      </div>
-    </section>
+    <PageHero
+      title="Contact us"
+      subtitle="Get in touch about collaboration, support, or SmartLoop."
+      :image="contact_hero"
+    />
 
     <form
       class="form-card mx-auto my-5"
@@ -54,6 +53,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import PageHero from '@/components/PageHero.vue'
+import contact_hero from '@/assets/images/contact_hero.png'
 
 const subject = ref('')
 const message = ref('')
