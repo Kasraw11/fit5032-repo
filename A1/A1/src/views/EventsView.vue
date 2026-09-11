@@ -42,7 +42,14 @@
                   Submit Rating
                 </button>
 
-                <p v-if="messages[event.id]" class="mt-3 mb-0">
+                <p
+                  v-if="messages[event.id]"
+                  class="mt-3 mb-0"
+                  :class="{
+                    'text-danger': messages[event.id] === 'Please select a rating from 1 to 5.',
+                    'text-success': messages[event.id] === 'Your rating has been updated.',
+                  }"
+                >
                   {{ messages[event.id] }}
                 </p>
               </div>
@@ -83,7 +90,7 @@ const getRatingCount = (eventId) => {
 const submitRating = (eventId) => {
   const rating = Number(selectedRatings.value[eventId])
 
-  if (rating < 1 || rating > 5) {
+  if (!rating || rating < 1 || rating > 5) {
     messages.value[eventId] = 'Please select a rating from 1 to 5.'
     return
   }
