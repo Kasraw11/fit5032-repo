@@ -2,7 +2,7 @@
   <main>
     <PageHero
       title="Welcome"
-      subtitle="Create a new SmartLoop account to get started."
+      subtitle="Create an account and join us today to get started."
       :image="sign_hero"
     />
 
