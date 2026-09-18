@@ -11,6 +11,9 @@ import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
 import AccountView from '../views/AccountView.vue'
+import ProfileView from '../views/account/ProfileView.vue'
+import MyEventsView from '../views/account/MyEventsView.vue'
+import SupportView from '../views/account/SupportView.vue'
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminEventsView from '../views/admin/AdminEventsView.vue'
@@ -74,6 +77,24 @@ const routes = [
     path: '/account',
     name: 'account',
     component: AccountView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/account/profile',
+    name: 'account-profile',
+    component: ProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/account/my-events',
+    name: 'account-my-events',
+    component: MyEventsView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/account/support',
+    name: 'account-support',
+    component: SupportView,
     meta: { requiresAuth: true },
   },
   {

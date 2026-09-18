@@ -105,14 +105,14 @@ const logout = () => {
 }
 
 .nav-link {
-  color: #374151;
+  color: #17365d;
   font-size: 1rem;
   font-weight: 500;
   margin: 0 0.15rem;
 }
 
 .nav-link.router-link-active {
-  color: #0d6efd;
+  color: #2b7efc;
   font-weight: 700;
 }
 </style>

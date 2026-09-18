@@ -37,10 +37,17 @@
                     {{ rating }}
                   </option>
                 </select>
-
-                <button type="button" class="btn btn-primary" @click="submitRating(event.id)">
-                  Submit Rating
-                </button>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-primary" @click="submitRating(event.id)">
+                    Submit Rating
+                  </button>
+                  <button type="button" class="btn btn-outline-primary" @click="saveEvent(event)">
+                    Save Event
+                  </button>
+                </div>
+                <p v-if="saveMessages[event.id]" class="text-success mt-3 mb-0">
+                  {{ saveMessages[event.id] }}
+                </p>
 
                 <p
                   v-if="messages[event.id]"
@@ -70,6 +77,7 @@ import events_hero from '@/assets/images/events_hero.png'
 const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
 const selectedRatings = ref({})
 const messages = ref({})
+const saveMessages = ref({})
 const ratings = ref(JSON.parse(localStorage.getItem('ratings')) || [])
 
 const getEventRatings = (eventId) => {
@@ -114,5 +122,28 @@ const submitRating = (eventId) => {
   }
 
   localStorage.setItem('ratings', JSON.stringify(ratings.value))
+}
+
+const saveEvent = (event) => {
+  const user = currentUser.value
+
+  if (!user) {
+    return
+  }
+
+  const storageKey = `savedEvents-${user.id}`
+  const savedEvents = JSON.parse(localStorage.getItem(storageKey)) || []
+
+  const alreadySaved = savedEvents.some((savedEvent) => savedEvent.id === event.id)
+
+  if (alreadySaved) {
+    saveMessages.value[event.id] = 'This event is already saved.'
+    return
+  }
+
+  savedEvents.push(event)
+  localStorage.setItem(storageKey, JSON.stringify(savedEvents))
+
+  saveMessages.value[event.id] = 'Event saved successfully.'
 }
 </script>

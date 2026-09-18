@@ -46,7 +46,7 @@ body {
 }
 
 .page-hero {
-  min-height: 600px;
+  min-height: 450px;
   position: relative;
   display: flex;
   align-items: center;
