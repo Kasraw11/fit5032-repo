@@ -22,12 +22,12 @@ const handleLogout = () => {
           <RouterLink to="/about" class="nav-link"> About </RouterLink>
         </li>
 
-        <li v-if="!isAuthenticated" class="nav-item">
-          <RouterLink to="/login" class="nav-link"> Login </RouterLink>
+        <li class="nav-item">
+          <RouterLink to="/FireLogin" class="nav-link"> Firebase Login </RouterLink>
         </li>
 
         <li class="nav-item">
-          <RouterLink to="/FireLogin" class="nav-link"> Firebase Login </RouterLink>
+          <RouterLink to="/FireRegister" class="nav-link"> Firebase Register </RouterLink>
         </li>
       </ul>
     </header>
