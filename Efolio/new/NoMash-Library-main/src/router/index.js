@@ -30,6 +30,11 @@ const routes = [
     path: '/access-denied',
     name: 'AccessDenied',
     component: AccessDeniedView
+  },
+  {
+    path: '/FireLogin',
+    name: 'FireLogin',
+    component: () => import('../views/FirebaseSigninView.vue')
   }
 ]
 

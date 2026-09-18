@@ -26,8 +26,8 @@ const handleLogout = () => {
           <RouterLink to="/login" class="nav-link"> Login </RouterLink>
         </li>
 
-        <li v-else class="nav-item">
-          <button type="button" class="nav-link" @click="handleLogout">Logout</button>
+        <li class="nav-item">
+          <RouterLink to="/FireLogin" class="nav-link"> Firebase Login </RouterLink>
         </li>
       </ul>
     </header>
