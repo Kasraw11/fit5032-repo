@@ -49,6 +49,9 @@ const handleLogout = () => {
             Logout
           </button>
         </li>
+        <li class="nav-item">
+          <RouterLink to="/addbook" class="nav-link" active-class="active"> Add Book </RouterLink>
+        </li>
       </ul>
       <p v-if="currentUser" class="text-center mt-3" aria-live="polite">
         { Role: {{ role === 'admin' ? 'Admin' : 'User' }} }
