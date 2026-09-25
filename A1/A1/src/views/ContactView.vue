@@ -3,7 +3,7 @@
     <PageHero
       title="Contact us"
       subtitle="Get in touch about collaboration, support, or SmartLoop."
-      :image="contact_hero"
+      :image="public_hero"
     />
 
     <form
@@ -54,7 +54,7 @@
 <script setup>
 import { ref } from 'vue'
 import PageHero from '@/components/PageHero.vue'
-import contact_hero from '@/assets/images/contact_hero.png'
+import public_hero from '@/assets/images/public_hero.png'
 
 const subject = ref('')
 const message = ref('')

@@ -36,10 +36,11 @@
 
 <script setup>
 import AccountSidebar from '@/components/AccountSidebar.vue'
+import { currentUser } from '@/authentication'
+import PageHero from '@/components/PageHero.vue'
+import public_hero from '@/assets/images/public_hero.png'
 
-const currentUser = JSON.parse(sessionStorage.getItem('currentUser'))
-
-const storageKey = `savedEvents-${currentUser.id}`
+const storageKey = `savedEvents-${currentUser.value.uid}`
 
 const savedEvents = JSON.parse(localStorage.getItem(storageKey)) || []
 </script>

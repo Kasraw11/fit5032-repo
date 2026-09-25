@@ -62,7 +62,7 @@ const selectItem = (item) => {
       <div class="row">
         <div v-for="item in filteredItems" :key="item.id" class="col-12 col-sm-6 mb-3">
           <div
-            class="card h-100 item-card"
+            class="card h-100 item-card card-gradient-1"
             data-bs-toggle="modal"
             data-bs-target="#itemDetailsModal"
             @click="selectItem(item)"

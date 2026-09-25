@@ -1,15 +1,21 @@
 <template>
-  <main class="container-fluid p-3">
+  <main>
+    <div class="mb-4">
+      <PageHero
+        :title="`Welcome, ${currentUser?.displayName || 'User'}`"
+        subtitle="View and update your account details."
+        :image="public_hero"
+      />
+    </div>
+
     <div class="row">
-      <aside class="col-12 col-md-3 mb-3">
+      <aside class="col-12 col-md-3 mb-4">
         <AccountSidebar />
       </aside>
 
       <section class="col-12 col-md-9">
-        <h1 class="h2 mb-3">Welcome, {{ currentUser.name }}</h1>
-
         <div class="row">
-          <div class="col-12 col-lg-4 mb-3">
+          <div class="col-12 col-lg-4 mb-4">
             <div class="card h-100 p-3">
               <h2 class="h5">Upcoming Events</h2>
               <p>View events that are coming up.</p>
@@ -17,7 +23,7 @@
             </div>
           </div>
 
-          <div class="col-12 col-lg-4 mb-3">
+          <div class="col-12 col-lg-4 mb-4">
             <div class="card h-100 p-3">
               <h2 class="h5">Event History</h2>
               <p>View events you attended in the past.</p>
@@ -27,7 +33,7 @@
             </div>
           </div>
 
-          <div class="col-12 col-lg-4 mb-3">
+          <div class="col-12 col-lg-4 mb-4">
             <div class="card h-100 p-3">
               <h2 class="h5">Saved Events</h2>
               <p>View events you saved for later.</p>
@@ -37,13 +43,6 @@
             </div>
           </div>
         </div>
-
-        <div class="card p-3 mb-3">
-          <h2 class="h4 mb-3">Account Information</h2>
-          <p><strong>Name:</strong> {{ currentUser.name }}</p>
-          <p><strong>Email:</strong> {{ currentUser.email }}</p>
-          <p class="mb-0"><strong>Role:</strong> {{ currentUser.role }}</p>
-        </div>
       </section>
     </div>
   </main>
@@ -51,10 +50,7 @@
 
 <script setup>
 import AccountSidebar from '@/components/AccountSidebar.vue'
-
-const currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || {
-  name: 'User',
-  email: '',
-  role: '',
-}
+import { currentUser } from '@/authentication'
+import PageHero from '@/components/PageHero.vue'
+import public_hero from '@/assets/images/public_hero.png'
 </script>

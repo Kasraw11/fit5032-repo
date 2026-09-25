@@ -1,8 +1,9 @@
 <template>
   <nav class="navbar navbar-expand-lg smartloop-navbar">
     <div class="container">
-      <RouterLink class="navbar-brand" to="/"> SmartLoop ♻️ </RouterLink>
-
+      <RouterLink class="navbar-brand" to="/">
+        <img src="/logo.png" alt="SmartLoop logo" class="brand-logo" />
+      </RouterLink>
       <button
         class="navbar-toggler"
         type="button"
@@ -45,14 +46,13 @@
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
 
-          <li v-if="currentUser && currentUser.role === 'admin'" class="nav-item mx-2">
-            <RouterLink class="nav-link" to="/admin">Admin Dashboard</RouterLink>
-          </li>
         </ul>
 
         <div v-if="currentUser" class="d-flex gap-2">
-          <RouterLink class="btn btn-outline-primary btn-sm" to="/account">Account</RouterLink>
-          <button type="button" class="btn btn-outline-danger btn-sm" @click="logout">
+          <RouterLink class="btn btn-outline-primary btn-sm" to="/account">
+            {{ currentUser.displayName || currentUser.email }}
+          </RouterLink>
+          <button type="button" class="btn btn-outline-danger btn-sm" @click="handleLogout">
             Logout
           </button>
         </div>
@@ -69,24 +69,18 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { currentUser, logout } from '@/authentication'
 
-const route = useRoute()
 const router = useRouter()
-const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
 
-watch(
-  () => route.path,
-  () => {
-    currentUser.value = JSON.parse(sessionStorage.getItem('currentUser'))
-  },
-)
-
-const logout = () => {
-  sessionStorage.removeItem('currentUser')
-  currentUser.value = null
-  router.push('/account/login')
+const handleLogout = async () => {
+  try {
+    await logout()
+    await router.push('/account/login')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
 }
 </script>
 
@@ -99,9 +93,15 @@ const logout = () => {
 }
 
 .navbar-brand {
-  color: #244d87;
-  font-size: 1.4rem;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .nav-link {

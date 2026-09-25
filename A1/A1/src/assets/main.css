@@ -1,10 +1,11 @@
 @import './base.css';
 
 body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.6;
+  background:
+    radial-gradient(circle at top left, rgba(173, 216, 230, 0.4), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(180, 230, 190, 0.3), transparent 40%), #f8fbff;
+
+  background-attachment: fixed;
 }
 
 #app {
@@ -15,9 +16,7 @@ body {
 .home-hero {
   min-height: 500px;
 
-  background:
-    linear-gradient(rgba(20, 45, 90, 0.45), rgba(20, 45, 90, 0.45)),
-    url('@/assets/images/smartloop_hero.png');
+  background: url('@/assets/images/smartloop_hero.png');
 
   background-size: cover;
   background-position: center;
@@ -46,7 +45,7 @@ body {
 }
 
 .page-hero {
-  min-height: 450px;
+  min-height: 300px;
   position: relative;
   display: flex;
   align-items: center;
@@ -64,12 +63,6 @@ body {
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.page-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(20, 45, 90, 0.4);
 }
 
 .page-hero-content {
@@ -114,6 +107,36 @@ body {
 .btn {
   border-radius: 0.8rem;
   font-weight: 500;
+}
+
+.card-gradient-3 {
+  background: linear-gradient(135deg, #f3e8ff, #e2d1f9);
+  border-color: #d1b9ed;
+}
+
+.card-gradient-1 {
+  background: linear-gradient(135deg, #e7f3ff, #cfe8ff);
+  border-color: #aed4f5;
+}
+
+.card-gradient-2 {
+  background: linear-gradient(135deg, #e8f7ed, #cdebd6);
+  border-color: #acd8b9;
+}
+
+.card-gradient-4 {
+  background: linear-gradient(135deg, #fff9df, #ffedb3);
+  border-color: #ead68c;
+}
+
+.card-gradient-5 {
+  background: linear-gradient(135deg, #e1f7f5, #c2ebe7);
+  border-color: #9fd8d2;
+}
+
+.card-gradient-6 {
+  background: linear-gradient(135deg, #fff0e3, #ffd9ba);
+  border-color: #edbd96;
 }
 
 @media (max-width: 576px) {

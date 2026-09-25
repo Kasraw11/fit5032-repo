@@ -119,8 +119,6 @@
 </template>
 
 <script setup>
-const currentUser = JSON.parse(sessionStorage.getItem('currentUser'))
-
 import PageHero from '@/components/PageHero.vue'
 import admin from '@/assets/images/admin.png'
 </script>

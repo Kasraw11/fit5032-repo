@@ -50,10 +50,12 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import PageHero from '@/components/PageHero.vue'
 import sign_hero from '@/assets/images/sign_hero.png'
 
 const router = useRouter()
+const auth = getAuth()
 
 const form = reactive({
   email: '',
@@ -67,10 +69,7 @@ const errors = reactive({
 
 const loginError = ref('')
 
-const ADMIN_EMAIL = 'admin@smartloop.com'
-const ADMIN_PASSWORD = 'Admin123!'
-
-const submitForm = () => {
+const submitForm = async () => {
   errors.email = ''
   errors.password = ''
   loginError.value = ''
@@ -83,41 +82,40 @@ const submitForm = () => {
     errors.password = 'Password is required.'
   }
 
-  if (!errors.email && !errors.password) {
-    const email = form.email.trim().toLowerCase()
+  if (errors.email || errors.password) {
+    return
+  }
 
-    if (email === ADMIN_EMAIL && form.password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(
-        'currentUser',
-        JSON.stringify({
-          id: 0,
-          name: 'Administrator',
-          email: ADMIN_EMAIL,
-          role: 'admin',
-        }),
-      )
+  try {
+    await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
 
-      router.push('/admin')
-      return
-    }
-
-    const users = JSON.parse(localStorage.getItem('users')) || []
-    const user = users.find((user) => user.email.toLowerCase() === email)
-
-    if (!user || user.password !== form.password) {
-      loginError.value = 'Invalid email or password.'
-      return
-    }
-
-    const currentUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    }
-
-    sessionStorage.setItem('currentUser', JSON.stringify(currentUser))
     router.push('/account')
+  } catch (error) {
+    switch (error.code) {
+      case 'auth/invalid-email':
+        errors.email = 'Please enter a valid email address.'
+        break
+
+      case 'auth/invalid-credential':
+        loginError.value = 'Incorrect email or password.'
+        break
+
+      case 'auth/user-disabled':
+        loginError.value = 'This account has been disabled.'
+        break
+
+      case 'auth/too-many-requests':
+        loginError.value = 'Too many attempts. Please try again later.'
+        break
+
+      case 'auth/network-request-failed':
+        loginError.value = 'Please check your internet connection.'
+        break
+
+      default:
+        loginError.value = 'Login failed. Please try again.'
+        console.error(error)
+    }
   }
 }
 </script>

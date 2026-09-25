@@ -3,7 +3,7 @@
     <PageHero
       title="Events"
       subtitle="Browse, register for, and manage sustainability events."
-      :image="events_hero"
+      :image="public_hero"
     />
 
     <section class="container py-5">
@@ -72,9 +72,9 @@
 import { ref } from 'vue'
 import events from '../data/event.json'
 import PageHero from '@/components/PageHero.vue'
-import events_hero from '@/assets/images/events_hero.png'
+import public_hero from '@/assets/images/public_hero.png'
+import { currentUser } from '@/authentication'
 
-const currentUser = ref(JSON.parse(sessionStorage.getItem('currentUser')))
 const selectedRatings = ref({})
 const messages = ref({})
 const saveMessages = ref({})
@@ -104,12 +104,13 @@ const submitRating = (eventId) => {
   }
 
   const existingRatingIndex = ratings.value.findIndex(
-    (savedRating) => savedRating.eventId === eventId && savedRating.userId === currentUser.value.id,
+    (savedRating) =>
+      savedRating.eventId === eventId && savedRating.userId === currentUser.value.uid,
   )
 
   const ratingToSave = {
     eventId: eventId,
-    userId: currentUser.value.id,
+    userId: currentUser.value.uid,
     rating: rating,
   }
 
@@ -131,7 +132,7 @@ const saveEvent = (event) => {
     return
   }
 
-  const storageKey = `savedEvents-${user.id}`
+  const storageKey = `savedEvents-${user.uid}`
   const savedEvents = JSON.parse(localStorage.getItem(storageKey)) || []
 
   const alreadySaved = savedEvents.some((savedEvent) => savedEvent.id === event.id)

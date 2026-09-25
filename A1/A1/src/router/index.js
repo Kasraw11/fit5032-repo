@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getIdTokenResult } from 'firebase/auth'
+import { currentUser, waitForAuthReady } from '@/authentication'
 
 import HomeView from '../views/HomeView.vue'
 import RecycleReuseView from '../views/RecycleReuseView.vue'
@@ -174,15 +176,21 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
-  const currentUser = JSON.parse(sessionStorage.getItem('currentUser'))
+router.beforeEach(async (to) => {
+  await waitForAuthReady()
+  const user = currentUser.value
 
-  if (to.meta.requiresAuth && !currentUser) {
-    return '/account/login'
+  if (to.meta.requiresAuth && !user) {
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.meta.requiresAdmin && currentUser.role !== 'admin') {
-    return '/account'
+  if (to.meta.requiresAdmin) {
+    const token = await getIdTokenResult(user)
+    if (!token.claims.admin) return { name: 'account' }
+  }
+
+  if ((to.name === 'login' || to.name === 'signup') && user) {
+    return { name: 'account' }
   }
 })
 

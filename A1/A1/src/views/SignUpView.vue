@@ -59,6 +59,17 @@
               <p v-if="errors.password" class="text-danger mt-1">
                 {{ errors.password }}
               </p>
+              <div class="password-requirements">
+                <p class="mb-2"><strong>Password requirements:</strong></p>
+
+                <ul class="mb-0">
+                  <li>At least 8 characters</li>
+                  <li>At least one uppercase letter</li>
+                  <li>At least one lowercase letter</li>
+                  <li>At least one number</li>
+                  <li>At least one special character</li>
+                </ul>
+              </div>
             </div>
 
             <div class="mb-3">
@@ -87,6 +98,10 @@
               {{ successMessage }}
             </p>
 
+            <p v-if="authError" class="text-danger mt-3">
+              {{ authError }}
+            </p>
+
             <p class="mt-3">
               have an account?
               <RouterLink to="account/login">Login</RouterLink>
@@ -103,8 +118,10 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHero from '@/components/PageHero.vue'
 import sign_hero from '@/assets/images/sign_hero.png'
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth'
 
 const router = useRouter()
+const auth = getAuth()
 
 const form = reactive({
   name: '',
@@ -120,6 +137,7 @@ const errors = reactive({
   confirmPassword: '',
 })
 
+const authError = ref('')
 const successMessage = ref('')
 
 const validateName = (blur) => {
@@ -188,41 +206,53 @@ const validateConfirmPassword = (blur) => {
   }
 }
 
-const submitForm = () => {
+const submitForm = async () => {
   successMessage.value = ''
+  authError.value = ''
 
   validateName(true)
   validateEmail(true)
   validatePassword(true)
   validateConfirmPassword(true)
 
-  if (!errors.name && !errors.email && !errors.password && !errors.confirmPassword) {
-    const users = JSON.parse(localStorage.getItem('users')) || []
-    const emailExists = users.some(
-      (user) => user.email.toLowerCase() === form.email.trim().toLowerCase(),
+  if (errors.name || errors.email || errors.password || errors.confirmPassword) {
+    return
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      form.email.trim(),
+      form.password,
     )
 
-    if (emailExists) {
-      errors.email = 'An account with this email already exists.'
-      return
+    await updateProfile(userCredential.user, {
+      displayName: form.name.trim(),
+    })
+
+    router.push('/account')
+  } catch (error) {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        errors.email = 'An account with this email already exists.'
+        break
+
+      case 'auth/invalid-email':
+        errors.email = 'Please enter a valid email address.'
+        break
+
+      case 'auth/weak-password':
+        errors.password = 'This password does not meet Firebase requirements.'
+        break
+
+      case 'auth/network-request-failed':
+        authError.value = 'Please check your internet connection.'
+        break
+
+      default:
+        authError.value = 'Registration failed. Please try again.'
+        console.error(error)
     }
-
-    const newUserId = users.length + 1
-    const newUser = {
-      id: newUserId,
-      name: form.name.trim(),
-      email: form.email.trim(),
-      password: form.password,
-      role: 'user',
-    }
-
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-    successMessage.value = ` Welcome! ${form.name}, your registration was successful.`
-
-    setTimeout(() => {
-      router.push({ name: 'login' })
-    }, 1000)
   }
 }
 </script>

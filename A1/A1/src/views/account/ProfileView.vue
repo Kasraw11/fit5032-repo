@@ -1,5 +1,11 @@
 <template>
   <main class="container-fluid p-3">
+    <PageHero
+      title="Profile"
+      subtitle="Manage your account information and settings."
+      :image="public_hero"
+    />
+
     <div class="row">
       <aside class="col-12 col-md-3 mb-3">
         <AccountSidebar />
@@ -10,9 +16,54 @@
 
         <div class="card p-3">
           <h2 class="h4 mb-3">Account Information</h2>
-          <p><strong>Name:</strong> {{ currentUser.name }}</p>
-          <p><strong>Email:</strong> {{ currentUser.email }}</p>
-          <p class="mb-0"><strong>Role:</strong> {{ currentUser.role }}</p>
+
+          <form v-if="isEditing" @submit.prevent="saveName">
+            <div class="mb-3 name-field">
+              <label for="profileName" class="form-label"><strong>Name</strong></label>
+              <input id="profileName" v-model="name" type="text" class="form-control" />
+              <p v-if="nameError" class="text-danger mt-1 mb-0">
+                {{ nameError }}
+              </p>
+            </div>
+          </form>
+
+          <p v-else><strong>Name:</strong> {{ currentUser?.displayName || 'User' }}</p>
+
+          <p><strong>Email:</strong> {{ currentUser?.email }}</p>
+
+          <p v-if="successMessage" class="text-success">
+            {{ successMessage }}
+          </p>
+
+          <div class="mt-2">
+            <button
+              v-if="!isEditing"
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              @click="startEditing"
+            >
+              Edit name
+            </button>
+
+            <div v-else class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                :disabled="isSaving"
+                @click="saveName"
+              >
+                {{ isSaving ? 'Saving...' : 'Save' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                :disabled="isSaving"
+                @click="cancelEditing"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -20,11 +71,63 @@
 </template>
 
 <script setup>
+import { ref, triggerRef } from 'vue'
+import { getAuth, updateProfile } from 'firebase/auth'
 import AccountSidebar from '@/components/AccountSidebar.vue'
+import { currentUser } from '@/authentication'
+import PageHero from '@/components/PageHero.vue'
+import public_hero from '@/assets/images/public_hero.png'
 
-const currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || {
-  name: 'User',
-  email: '',
-  role: '',
+const name = ref(currentUser.value?.displayName || '')
+const nameError = ref('')
+const successMessage = ref('')
+const isSaving = ref(false)
+const isEditing = ref(false)
+
+const startEditing = () => {
+  name.value = currentUser.value?.displayName || ''
+  nameError.value = ''
+  successMessage.value = ''
+  isEditing.value = true
+}
+
+const cancelEditing = () => {
+  name.value = currentUser.value?.displayName || ''
+  nameError.value = ''
+  isEditing.value = false
+}
+
+const saveName = async () => {
+  nameError.value = ''
+  successMessage.value = ''
+
+  if (name.value.trim().length < 2) {
+    nameError.value = 'Name must be at least 2 characters long.'
+    return
+  }
+
+  try {
+    isSaving.value = true
+    const auth = getAuth()
+
+    await updateProfile(auth.currentUser, {
+      displayName: name.value.trim(),
+    })
+
+    triggerRef(currentUser)
+    successMessage.value = 'Your name has been updated.'
+    isEditing.value = false
+  } catch (error) {
+    nameError.value = 'Unable to update your name. Please try again.'
+    console.error(error)
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
+
+<style scoped>
+.name-field {
+  max-width: 400px;
+}
+</style>
