@@ -1,9 +1,25 @@
 <template>
   <main>
     <section class="home-hero">
-      <div class="container">
-        <h1>SmartLoop</h1>
-        <p>Helping the community reduce waste, reuse items and recycle correctly.</p>
+      <div class="container-fluid px-4 px-md-5">
+        <div class="home-hero-content">
+          <p class="hero-label">WELCOME TO SMARTLOOP</p>
+
+          <div class="text-capitalize">
+            <h1>Make smarter choices with your waste</h1>
+          </div>
+
+          <p class="hero-description">
+            Learn how to recycle correctly, reduce waste <br />
+            ,take part in sustainability events in your community.
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 mt-4">
+            <RouterLink class="btn btn-primary btn-lg" to="/learn"> Start learning </RouterLink>
+
+            <RouterLink class="btn btn-light btn-lg" to="/events"> Explore events </RouterLink>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -1,10 +1,10 @@
 @import './base.css';
 
+/* Global page styles */
 body {
   background:
-    radial-gradient(circle at top left, rgba(173, 216, 230, 0.4), transparent 40%),
+    radial-gradient(circle at top left, rgba(173, 216, 230, 0.4), transparent 80%),
     radial-gradient(circle at bottom right, rgba(180, 230, 190, 0.3), transparent 40%), #f8fbff;
-
   background-attachment: fixed;
 }
 
@@ -15,43 +15,45 @@ body {
 
 .home-hero {
   min-height: 500px;
-
   background: url('@/assets/images/smartloop_hero.png');
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
-  color: #ffffff;
-
+  color: #191919;
   display: flex;
-  align-items: center;
-  justify-content: left;
-
+  align-items: bottom;
+  justify-content: flex-start;
   text-align: left;
   padding: 3.5rem 1rem;
 }
 
+.home-hero-content {
+  width: 100%;
+  max-width: 650px;
+  margin-left: 0;
+  margin-right: auto;
+}
+
 .home-hero h1 {
-  font-size: clamp(2.25rem, 5vw, 3.25rem);
-  font-weight: 700;
-  margin-bottom: 0;
+  max-width: 650px;
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  line-height: 1.15;
+  overflow-wrap: break-word;
 }
 
 .home-hero p {
   font-size: 1.1rem;
-  margin: 0.75rem auto 0;
-  max-width: 720px;
+  margin: 0.75rem 0 0;
+  max-width: 650px;
 }
 
 .page-hero {
-  min-height: 300px;
+  min-height: 250px;
   position: relative;
   display: flex;
   align-items: center;
   overflow: hidden;
-  background-color: #244d87;
-  color: #ffffff;
+  color: #134e4a;
   padding: 3.5rem 1rem;
   text-align: center;
 }
@@ -63,6 +65,12 @@ body {
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.page-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: transparent;
 }
 
 .page-hero-content {
@@ -109,11 +117,6 @@ body {
   font-weight: 500;
 }
 
-.card-gradient-3 {
-  background: linear-gradient(135deg, #f3e8ff, #e2d1f9);
-  border-color: #d1b9ed;
-}
-
 .card-gradient-1 {
   background: linear-gradient(135deg, #e7f3ff, #cfe8ff);
   border-color: #aed4f5;
@@ -122,6 +125,11 @@ body {
 .card-gradient-2 {
   background: linear-gradient(135deg, #e8f7ed, #cdebd6);
   border-color: #acd8b9;
+}
+
+.card-gradient-3 {
+  background: linear-gradient(135deg, #f3e8ff, #e2d1f9);
+  border-color: #d1b9ed;
 }
 
 .card-gradient-4 {
@@ -140,6 +148,11 @@ body {
 }
 
 @media (max-width: 576px) {
+  .home-hero {
+    min-height: 420px;
+    padding: 2.75rem 1rem;
+  }
+
   .page-hero {
     padding: 2.75rem 1rem;
   }

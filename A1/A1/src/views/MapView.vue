@@ -3,7 +3,7 @@
     <PageHero
       title="Map"
       subtitle="Find nearby recycling, donation, and repair services."
-      :image="map_hero"
+      :image="public_hero"
     />
   </main>
 </template>
@@ -12,5 +12,5 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHero from '@/components/PageHero.vue'
-import map_hero from '@/assets/images/map_hero.png'
+import public_hero from '@/assets/images/public_hero.png'
 </script>

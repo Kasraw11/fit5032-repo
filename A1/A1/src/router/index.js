@@ -4,11 +4,16 @@ import { currentUser, waitForAuthReady } from '@/authentication'
 
 import HomeView from '../views/HomeView.vue'
 import RecycleReuseView from '../views/RecycleReuseView.vue'
+
 import MapView from '../views/MapView.vue'
+
 import EventsView from '../views/EventsView.vue'
-import LearnView from '../views/LearnView.vue'
-import LearnRulesView from '../views/LearnRulesView.vue'
-import LearnDonationView from '../views/LearnDonationView.vue'
+
+import LearnView from '../views/learn/LearnView.vue'
+import LearnRulesView from '../views/learn/RecyclingRulesView.vue'
+import LearnDonationView from '../views/learn/DonationGuideView.vue'
+import CompostingView from '../views/learn/CompostingView.vue'
+
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -16,6 +21,7 @@ import AccountView from '../views/AccountView.vue'
 import ProfileView from '../views/account/ProfileView.vue'
 import MyEventsView from '../views/account/MyEventsView.vue'
 import SupportView from '../views/account/SupportView.vue'
+
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminEventsView from '../views/admin/AdminEventsView.vue'
@@ -26,6 +32,7 @@ import AdminSettingsView from '../views/admin/AdminSettingsView.vue'
 import AdminNotificationsView from '../views/admin/AdminNotificationsView.vue'
 import AdminInboxView from '../views/admin/AdminInboxView.vue'
 import AdminPageManagementView from '../views/admin/AdminPageManagementView.vue'
+
 import SignUpView from '../views/SignUpView.vue'
 
 const routes = [
@@ -65,6 +72,13 @@ const routes = [
     name: 'learn-donation',
     component: LearnDonationView,
   },
+
+  {
+    path: '/learn/composting',
+    name: 'learn-composting',
+    component: CompostingView,
+  },
+
   {
     path: '/contact',
     name: 'contact',

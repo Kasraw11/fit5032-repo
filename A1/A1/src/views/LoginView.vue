@@ -3,7 +3,7 @@
     <PageHero
       title="Welcome Back"
       subtitle="Log in to access your SmartLoop account."
-      :image="sign_hero"
+      :image="public_hero"
     />
 
     <div class="container py-5">
@@ -52,7 +52,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import PageHero from '@/components/PageHero.vue'
-import sign_hero from '@/assets/images/sign_hero.png'
+import public_hero from '@/assets/images/public_hero.png'
 
 const router = useRouter()
 const auth = getAuth()

@@ -3,7 +3,7 @@
     <PageHero
       title="About Us"
       subtitle="Learn more about our mission and commitment to sustainability."
-      :image="about_hero"
+      :image="public_hero"
     />
 
     <section class="container py-5">
@@ -22,5 +22,5 @@
 
 <script setup>
 import PageHero from '@/components/PageHero.vue'
-import about_hero from '@/assets/images/about_hero.png'
+import public_hero from '@/assets/images/public_hero.png'
 </script>

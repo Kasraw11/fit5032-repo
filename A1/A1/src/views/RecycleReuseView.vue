@@ -1,44 +1,19 @@
-<script setup>
-import { ref, computed } from 'vue'
-import { recycleItems } from '../data/recycleItems.js'
-
-const searchTerm = ref('')
-
-const selectedCategory = ref('All')
-
-const selectedItem = ref(null)
-
-const filteredItems = computed(() => {
-  return recycleItems.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-
-    const matchesCategory =
-      selectedCategory.value === 'All' || item.category === selectedCategory.value
-
-    return matchesSearch && matchesCategory
-  })
-})
-
-const selectItem = (item) => {
-  selectedItem.value = item
-}
-</script>
-
 <template>
   <main>
     <PageHero
       title="Recycle & Reuse"
       subtitle="Learn how to properly recycle, reuse, and dispose of common items."
-      :image="recycle_reuse"
+      :image="public_hero"
     />
 
     <div class="container py-5">
       <div class="row mb-4">
-        <div class="col-12 col-sm-6 mb-3">
+        <div class="col-6 mb-3">
           <label for="search" class="form-label"> Search item </label>
 
           <input
             id="search"
+            WW
             v-model="searchTerm"
             type="text"
             class="form-control"
@@ -46,7 +21,7 @@ const selectItem = (item) => {
           />
         </div>
 
-        <div class="col-12 col-sm-6 mb-3">
+        <div class="col-2 col mb-4">
           <label for="category" class="form-label"> Filter by category </label>
 
           <select id="category" v-model="selectedCategory" class="form-select">
@@ -150,9 +125,30 @@ const selectItem = (item) => {
 }
 </style>
 
-<script>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+<script setup>
+import { computed, ref } from 'vue'
+import { recycleItems } from '../data/recycleItems.js'
 import PageHero from '@/components/PageHero.vue'
-import recycle_reuse from '@/assets/images/recycle_reuse.png'
+import public_hero from '@/assets/images/public_hero.png'
+
+const searchTerm = ref('')
+
+const selectedCategory = ref('All')
+
+const selectedItem = ref(null)
+
+const filteredItems = computed(() => {
+  return recycleItems.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+
+    const matchesCategory =
+      selectedCategory.value === 'All' || item.category === selectedCategory.value
+
+    return matchesSearch && matchesCategory
+  })
+})
+
+const selectItem = (item) => {
+  selectedItem.value = item
+}
 </script>
