@@ -28,10 +28,36 @@ body {
 }
 
 .home-hero-content {
+  animation: fade-in 1s ease-in-out;
   width: 100%;
   max-width: 650px;
   margin-left: 0;
   margin-right: auto;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-page .card {
+  animation: fade-in 0.5s ease-in-out;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.home-page .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(23, 54, 93, 0.15);
 }
 
 .home-hero h1 {
@@ -156,4 +182,66 @@ body {
   .page-hero {
     padding: 2.75rem 1rem;
   }
+}
+
+/* footer */
+.home-page {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+}
+
+.home-footer {
+  margin-top: auto;
+  background-color: #e7f3ff;
+  color: #17365d;
+  border-top: 2px solid #aed4f5;
+}
+
+.home-footer h2,
+.home-footer h3 {
+  color: #17365d;
+  font-weight: 700;
+}
+
+.footer-description {
+  color: #294a68;
+  max-width: 420px;
+}
+
+.home-footer a {
+  color: #174c83;
+  text-decoration: none;
+}
+
+.home-footer a:hover {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+.home-footer li {
+  margin-bottom: 0.5rem;
+}
+
+.home-footer hr {
+  border-color: #aed4f5;
+  opacity: 1;
+}
+
+.home-footer .text-center {
+  color: #526f89;
+}
+
+/* Page transition animations */
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 0.1s ease,
+    filter 0.1s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(4px);
 }

@@ -1,8 +1,9 @@
 <template>
-  <nav class="navbar navbar-expand-lg smartloop-navbar">
+  <nav class="navbar navbar-expand-lg navbar-light smartloop-navbar">
     <div class="container">
-      <RouterLink class="navbar-brand" to="/">
+      <RouterLink class="navbar-brand" to="/" aria-label="SmartLoop home">
         <img src="/logo.png" alt="SmartLoop logo" class="brand-logo" />
+        <span class="brand-name">SmartLoop</span>
       </RouterLink>
       <button
         class="navbar-toggler"
@@ -17,47 +18,50 @@
       </button>
 
       <div id="mainNavbar" class="collapse navbar-collapse">
-        <ul class="navbar-nav mx-lg-auto">
-          <li class="nav-item mx-2">
+        <ul class="navbar-nav mx-lg-auto gap-lg-1">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/">Home</RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/recycle-reuse"> Recycle & Reuse </RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/locations"> Map </RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li v-if="currentUser" class="nav-item">
             <RouterLink class="nav-link" to="/events"> Events </RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/learn"> Learn </RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/contact"> Contact </RouterLink>
           </li>
 
-          <li class="nav-item mx-2">
+          <li class="nav-item">
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
-
         </ul>
 
-        <div v-if="currentUser" class="d-flex gap-2">
-          <RouterLink class="btn btn-outline-primary btn-sm" to="/account">
+        <div v-if="currentUser" class="navbar-actions d-flex align-items-center gap-2">
+          <RouterLink class="btn btn-outline-primary btn-sm account-button" to="/account">
             {{ currentUser.displayName || currentUser.email }}
           </RouterLink>
-          <button type="button" class="btn btn-outline-danger btn-sm" @click="handleLogout">
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm logout-button"
+            @click="handleLogout"
+          >
             Logout
           </button>
         </div>
 
-        <div v-else class="d-flex gap-2">
+        <div v-else class="navbar-actions d-flex align-items-center gap-2">
           <RouterLink class="btn btn-outline-primary btn-sm" to="/account/login">
             Login
           </RouterLink>
@@ -86,33 +90,89 @@ const handleLogout = async () => {
 
 <style scoped>
 .smartloop-navbar {
-  background-color: var(--navbar-background-color);
-  border-bottom: 1px solid var(--navbar-border-color);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  padding: 0.75rem 0;
+  background: linear-gradient(90deg, rgba(239, 248, 255, 0.98), rgba(232, 247, 237, 0.98));
+  border-top: 3px solid #2f8f68;
+  border-bottom: 1px solid #c9dce8;
+  box-shadow: 0 4px 18px rgba(23, 54, 93, 0.08);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  padding: 0.65rem 0;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  color: #184780;
+  font-family: Georgia;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
-.brand-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+.brand-name {
+  line-height: 1;
 }
 
 .nav-link {
-  color: #17365d;
+  color: #294a68;
+  font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 1rem;
   font-weight: 500;
-  margin: 0 0.15rem;
 }
 
-.nav-link.router-link-active {
-  color: #2b7efc;
-  font-weight: 700;
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.navbar .navbar-nav .nav-link {
+  border-radius: 100px;
+  padding: 1.1rem;
+  transition: background-color 0.2s ease;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.72);
+  color: #1f6f50;
+  transform: translateY(-1px);
+}
+
+.navbar .navbar-nav .nav-link.router-link-active {
+  background-color: #d7edff;
+  color: #174c83;
+}
+
+@media (max-width: 1200px) {
+  .brand-name {
+    display: none;
+  }
+}
+
+@media (max-width: 990px) {
+  .smartloop-navbar {
+    padding: 1rem;
+  }
+
+  .navbar-collapse {
+    padding-top: 1rem;
+  }
+
+  .navbar-nav {
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .navbar .navbar-nav .nav-link {
+    border-radius: 0.6rem;
+    padding: 0.65rem 0.8rem;
+  }
+
+  .navbar-actions {
+    padding-bottom: 0.5rem;
+  }
+
+  .brand-name {
+    display: inline;
+  }
 }
 </style>

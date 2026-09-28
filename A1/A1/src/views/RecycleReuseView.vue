@@ -118,10 +118,13 @@
 <style scoped>
 .item-card {
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .item-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
 }
 </style>
 

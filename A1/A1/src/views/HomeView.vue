@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <main class="home-page">
     <section class="home-hero">
       <div class="container-fluid px-4 px-md-5">
         <div class="home-hero-content">
@@ -71,5 +71,33 @@
         </div>
       </div>
     </section>
+
+    <footer class="home-footer">
+      <div class="container py-4">
+        <div class="row g-6">
+          <div class="col-6 col-md-5">
+            <h2 class="h4">SmartLoop</h2>
+
+            <p class="footer-description">
+              Helping our community make better choices about recycling, reuse and waste.
+            </p>
+          </div>
+
+          <div class="col-4 md-4">
+            <h3 class="h6">Support</h3>
+
+            <div class="links d-flex flex-column gap-2">
+              <RouterLink to="/contact">Contact Us</RouterLink>
+              <RouterLink to="/about">About SmartLoop</RouterLink>
+              <RouterLink to="/locations">Find Locations</RouterLink>
+            </div>
+          </div>
+        </div>
+
+        <hr />
+
+        <p class="mb-0 text-center">&copy; 2026 SmartLoop. All rights reserved.</p>
+      </div>
+    </footer>
   </main>
 </template>
