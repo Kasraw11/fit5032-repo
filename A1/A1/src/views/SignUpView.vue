@@ -230,7 +230,12 @@ const submitForm = async () => {
       displayName: form.name.trim(),
     })
 
-    router.push('/account')
+    successMessage.value = 'Account created successfully! Redirecting...'
+    console.log('Firebase user created')
+
+    setTimeout(() => {
+      router.push('/account')
+    }, 1000)
   } catch (error) {
     switch (error.code) {
       case 'auth/email-already-in-use':

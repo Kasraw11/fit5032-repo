@@ -26,7 +26,6 @@
     <section class="container py-4">
       <div class="text-center mb-4">
         <h2>Get Started</h2>
-        <p class="text-muted">Choose an area to explore.</p>
       </div>
 
       <div class="row g-4 justify-content-center">
@@ -41,7 +40,7 @@
         </div>
 
         <div class="col-12 col-md-3">
-          <div class="card h-100 shadow-sm card-gradient-1">
+          <div class="card h-100 shadow-sm card-gradient-2">
             <div class="card-body p-4">
               <h3 class="h4">Events</h3>
               <p>Find practical workshops for everyday recycle instructions .</p>
@@ -61,7 +60,7 @@
         </div>
 
         <div class="col-12 col-md-3">
-          <div class="card h-100 shadow-sm card-gradient-1">
+          <div class="card h-100 shadow-sm card-gradient-2">
             <div class="card-body p-4">
               <h3 class="h4">Community Events</h3>
               <p>Discover local sustainability events and leave a rating.</p>

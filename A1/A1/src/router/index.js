@@ -10,9 +10,21 @@ import MapView from '../views/MapView.vue'
 import EventsView from '../views/EventsView.vue'
 
 import LearnView from '../views/learn/LearnView.vue'
+import AZRecyclingView from '../views/learn/AZRecyclingView.vue'
 import LearnRulesView from '../views/learn/RecyclingRulesView.vue'
 import LearnDonationView from '../views/learn/DonationGuideView.vue'
-import CompostingView from '../views/learn/CompostingView.vue'
+import BatteriesElectronicView from '../views/learn/a-z-recycling/BatteriesElectronicView.vue'
+import PackagingLabelsView from '../views/learn/a-z-recycling/PackagingLabelsView.vue'
+import CompostingView from '../views/learn/a-z-recycling/CompostingView.vue'
+import BinCollectionView from '../views/learn/bin-collection/BinCollectionView.vue'
+import CollectionDaysView from '../views/learn/bin-collection/CollectionDaysView.vue'
+import BinContentsView from '../views/learn/bin-collection/BinContentsView.vue'
+import LandfillBinView from '../views/learn/bin-collection/LandfillBinView.vue'
+import RecyclingBinView from '../views/learn/bin-collection/RecyclingBinView.vue'
+import FoodGardenWasteBinView from '../views/learn/bin-collection/FoodGardenWasteBinView.vue'
+import BinPlacementView from '../views/learn/bin-collection/BinPlacementView.vue'
+import BinCareView from '../views/learn/bin-collection/BinCareView.vue'
+import ReduceReuseView from '../views/learn/ReduceReuseView.vue'
 
 import ContactView from '../views/ContactView.vue'
 import AboutView from '../views/AboutView.vue'
@@ -61,6 +73,66 @@ const routes = [
     path: '/learn',
     name: 'learn',
     component: LearnView,
+  },
+  {
+    path: '/learn/a-z-recycling',
+    name: 'learn-a-z-recycling',
+    component: AZRecyclingView,
+  },
+  {
+    path: '/learn/a-z-recycling/batteries-electronics',
+    name: 'learn-batteries-electronics',
+    component: BatteriesElectronicView,
+  },
+  {
+    path: '/learn/a-z-recycling/packaging-labels',
+    name: 'learn-packaging-labels',
+    component: PackagingLabelsView,
+  },
+  {
+    path: '/learn/bin-collection',
+    name: 'learn-bin-collection',
+    component: BinCollectionView,
+  },
+  {
+    path: '/learn/bin-collection/collection-days',
+    name: 'learn-collection-days',
+    component: CollectionDaysView,
+  },
+  {
+    path: '/learn/bin-collection/bin-contents',
+    name: 'learn-bin-contents',
+    component: BinContentsView,
+  },
+  {
+    path: '/learn/bin-collection/landfill-bin',
+    name: 'learn-landfill-bin',
+    component: LandfillBinView,
+  },
+  {
+    path: '/learn/bin-collection/recycling-bin',
+    name: 'learn-recycling-bin',
+    component: RecyclingBinView,
+  },
+  {
+    path: '/learn/bin-collection/food-garden-waste-bin',
+    name: 'learn-food-garden-waste-bin',
+    component: FoodGardenWasteBinView,
+  },
+  {
+    path: '/learn/bin-collection/bin-placement',
+    name: 'learn-bin-placement',
+    component: BinPlacementView,
+  },
+  {
+    path: '/learn/bin-collection/bin-care',
+    name: 'learn-bin-care',
+    component: BinCareView,
+  },
+  {
+    path: '/learn/reduce-reuse',
+    name: 'learn-reduce-reuse',
+    component: ReduceReuseView,
   },
   {
     path: '/learn/rules',

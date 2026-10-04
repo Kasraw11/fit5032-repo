@@ -173,6 +173,12 @@ body {
   border-color: #edbd96;
 }
 
+.card-gradient-7 {
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 75%, #f0f7ff 100%);
+  border-color: #dce9f8;
+  box-shadow: 0 4px 14px rgba(23, 78, 131, 0.12) !important;
+}
+
 @media (max-width: 576px) {
   .home-hero {
     min-height: 420px;
