@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getIdTokenResult } from 'firebase/auth'
-import { currentUser, waitForAuthReady } from '@/authentication'
+import { currentUser, waitForAuthReady, checkAdminRole } from '@/authentication'
 
 import HomeView from '../views/HomeView.vue'
 import RecycleReuseView from '../views/RecycleReuseView.vue'
@@ -38,6 +37,7 @@ import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminEventsView from '../views/admin/AdminEventsView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
+import AdminRecycleReuseView from '../views/admin/AdminRecycleReuseView.vue'
 import AdminOverviewView from '../views/admin/AdminOverviewView.vue'
 import AdminStatsView from '../views/admin/AdminStatsView.vue'
 import AdminSettingsView from '../views/admin/AdminSettingsView.vue'
@@ -220,6 +220,12 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
+    path: '/admin/recycle-reuse',
+    name: 'admin-recycle-reuse',
+    component: AdminRecycleReuseView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
     path: '/admin/overview',
     name: 'admin-overview',
     component: AdminOverviewView,
@@ -271,8 +277,8 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresAdmin) {
-    const token = await getIdTokenResult(user)
-    if (!token.claims.admin) return { name: 'account' }
+    const adminAllowed = await checkAdminRole(user)
+    if (!adminAllowed) return { name: user ? 'account' : 'login' }
   }
 
   if ((to.name === 'login' || to.name === 'signup') && user) {

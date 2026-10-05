@@ -26,7 +26,23 @@
           <div v-for="event in savedEvents" :key="event.id" class="border rounded p-3 mt-3">
             <h3 class="h6">{{ event.name }}</h3>
             <p><strong>Date:</strong> {{ event.date }}</p>
-            <p class="mb-0"><strong>Location:</strong> {{ event.location }}</p>
+            <p>
+              <strong>Address:</strong>
+              {{
+                event.address ||
+                (typeof event.location === 'string' ? event.location : 'Address not provided')
+              }}
+            </p>
+            <RouterLink
+              v-if="
+                event.location &&
+                typeof event.location.latitude === 'number' &&
+                typeof event.location.longitude === 'number'
+              "
+              class="btn btn-outline-primary btn-sm"
+              :to="{ name: 'locations', query: { eventId: event.id } }"
+              >View on Map</RouterLink
+            >
           </div>
         </div>
       </section>
@@ -37,10 +53,14 @@
 <script setup>
 import AccountSidebar from '@/components/AccountSidebar.vue'
 import { currentUser } from '@/authentication'
-import PageHero from '@/components/PageHero.vue'
-import public_hero from '@/assets/images/public_hero.png'
 
 const storageKey = `savedEvents-${currentUser.value.uid}`
 
-const savedEvents = JSON.parse(localStorage.getItem(storageKey)) || []
+let savedEvents = []
+try {
+  const saved = JSON.parse(localStorage.getItem(storageKey))
+  if (Array.isArray(saved)) savedEvents = saved
+} catch {
+  savedEvents = []
+}
 </script>

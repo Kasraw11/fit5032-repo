@@ -8,33 +8,54 @@
 
     <div class="container py-5">
       <div class="row mb-4">
-        <div class="col-6 mb-3">
-          <label for="search" class="form-label"> Search item </label>
+        <div class="col-12 col-md-6 mb-3">
+          <label for="search" class="form-label">Search by item name or category</label>
 
-          <input
-            id="search"
-            WW
-            v-model="searchTerm"
-            type="text"
-            class="form-control"
-            placeholder="Search for an item"
-          />
+          <div class="input-group">
+            <input
+              id="search"
+              ref="searchInput"
+              v-model="searchTerm"
+              type="search"
+              class="form-control"
+              placeholder="For example, jar or glass"
+              :disabled="isLoading"
+            />
+            <button
+              v-if="searchTerm"
+              type="button"
+              class="btn btn-outline-secondary"
+              :disabled="isLoading"
+              @click="clearSearch"
+            >
+              Clear
+            </button>
+          </div>
         </div>
 
-        <div class="col-2 col mb-4">
+        <div class="col-12 col-md-4 mb-4">
           <label for="category" class="form-label"> Filter by category </label>
 
-          <select id="category" v-model="selectedCategory" class="form-select">
-            <option value="All">All Categories</option>
-            <option value="Plastic">Plastic</option>
-            <option value="Paper">Paper</option>
-            <option value="Glass">Glass</option>
-            <option value="E-Waste">E-Waste</option>
+          <select
+            id="category"
+            v-model="selectedCategory"
+            class="form-select"
+            :disabled="isLoading"
+          >
+            <option value="">All Categories</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
           </select>
         </div>
       </div>
 
-      <div class="row">
+      <p v-if="isLoading" role="status">Loading recycling items...</p>
+      <div v-if="loadError" class="alert alert-danger" role="alert">
+        <p>{{ loadError }}</p>
+        <button type="button" class="btn btn-outline-danger" @click="loadItems">Try Again</button>
+      </div>
+      <div v-if="!isLoading && !loadError" class="row">
         <div v-for="item in filteredItems" :key="item.id" class="col-12 col-sm-6 mb-3">
           <div
             class="card h-100 item-card card-gradient-1"
@@ -53,7 +74,7 @@
               </p>
 
               <p>
-                {{ item.details }}
+                {{ item.description }}
               </p>
 
               <button
@@ -70,7 +91,7 @@
         </div>
       </div>
 
-      <p v-if="filteredItems.length === 0">No items found.</p>
+      <p v-if="!isLoading && !loadError && filteredItems.length === 0">No items found.</p>
 
       <div id="itemDetailsModal" class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -94,19 +115,19 @@
               </p>
 
               <h3 class="h6">Item Details</h3>
-              <p>{{ selectedItem.details }}</p>
+              <p>{{ selectedItem.description }}</p>
 
               <h3 class="h6">Reuse Options</h3>
               <p>{{ selectedItem.reuse }}</p>
 
               <h3 class="h6">Repair Options</h3>
-              <p>{{ selectedItem.repair }}</p>
+              <p>{{ selectedItem.repair || 'No repair information provided yet.' }}</p>
 
               <h3 class="h6">Recycle Instructions</h3>
               <p>{{ selectedItem.recycle }}</p>
 
               <h3 class="h6">Disposal Instructions</h3>
-              <p>{{ selectedItem.disposal }}</p>
+              <p>{{ selectedItem.dispose }}</p>
             </div>
           </div>
         </div>
@@ -129,29 +150,69 @@
 </style>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { recycleItems } from '../data/recycleItems.js'
+import { computed, onMounted, ref } from 'vue'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '@/firebase/init'
 import PageHero from '@/components/PageHero.vue'
 import public_hero from '@/assets/images/public_hero.png'
 
+const recycleItems = ref([])
+const isLoading = ref(false)
+const loadError = ref('')
 const searchTerm = ref('')
+const searchInput = ref(null)
 
-const selectedCategory = ref('All')
+const selectedCategory = ref('')
 
 const selectedItem = ref(null)
 
-const filteredItems = computed(() => {
-  return recycleItems.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+const categories = computed(() => {
+  const categoryList = []
+  for (const item of recycleItems.value) {
+    if (item.category && !categoryList.includes(item.category)) {
+      categoryList.push(item.category)
+    }
+  }
+  return categoryList.sort((a, b) => a.localeCompare(b))
+})
 
+const filteredItems = computed(() => {
+  const search = searchTerm.value.trim().toLowerCase()
+
+  return recycleItems.value.filter((item) => {
+    const name = String(item.name || '').toLowerCase()
+    const category = String(item.category || '').toLowerCase()
+    const matchesSearch = name.includes(search) || category.includes(search)
     const matchesCategory =
-      selectedCategory.value === 'All' || item.category === selectedCategory.value
+      selectedCategory.value === '' || item.category === selectedCategory.value
 
     return matchesSearch && matchesCategory
   })
 })
 
+const clearSearch = () => {
+  searchTerm.value = ''
+  searchInput.value?.focus()
+}
+
+const loadItems = async () => {
+  if (isLoading.value) return
+  isLoading.value = true
+  loadError.value = ''
+  try {
+    const snapshot = await getDocs(collection(db, 'recycleItems'))
+    recycleItems.value = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }))
+  } catch (error) {
+    loadError.value = 'Unable to load recycling items. Please try again.'
+    console.error('Unable to load recycling items:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const selectItem = (item) => {
   selectedItem.value = item
 }
+
+onMounted(loadItems)
 </script>

@@ -51,6 +51,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { checkAdminRole, waitForAuthReady } from '@/authentication'
 import PageHero from '@/components/PageHero.vue'
 import public_hero from '@/assets/images/public_hero.png'
 
@@ -87,9 +88,10 @@ const submitForm = async () => {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
-
-    router.push('/account')
+    const result = await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
+    await waitForAuthReady()
+    const adminAllowed = await checkAdminRole(result.user)
+    await router.push(adminAllowed ? '/admin' : '/account')
   } catch (error) {
     switch (error.code) {
       case 'auth/invalid-email':

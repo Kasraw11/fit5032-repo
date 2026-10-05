@@ -46,6 +46,9 @@
           <li class="nav-item">
             <RouterLink class="nav-link" to="/about"> About </RouterLink>
           </li>
+          <li v-if="isAdmin" class="nav-item">
+            <RouterLink class="nav-link" to="/admin">Admin Dashboard</RouterLink>
+          </li>
         </ul>
 
         <div v-if="currentUser" class="navbar-actions d-flex align-items-center gap-2">
@@ -74,7 +77,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { currentUser, logout } from '@/authentication'
+import { currentUser, isAdmin, logout } from '@/authentication'
 
 const router = useRouter()
 
