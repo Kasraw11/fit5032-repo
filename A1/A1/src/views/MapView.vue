@@ -18,10 +18,11 @@
               @change="updateMarkers"
             >
               <option value="all">All</option>
-              <option value="events">Events</option>
-              <option value="recycling">Recycling Locations</option>
-              <option value="donation">Donation Centers</option>
-              <option value="repair">Repair Services</option>
+              <option value="Donations">Donations</option>
+              <option value="Workshops">Workshops</option>
+              <option value="Events">Events</option>
+              <option value="Recycling Centres">Recycling Centres</option>
+              <option value="Repair Centres">Repair Centres</option>
             </select>
           </div>
         </div>
@@ -60,7 +61,7 @@
               </p>
               <div v-else>
                 <span class="badge bg-primary mb-3">
-                  {{ selectedKind === 'event' ? 'Event' : locationTypeLabel(selectedItem.type) }}
+                  {{ selectedKind === 'event' ? 'Event' : mapCategory(selectedItem) }}
                 </span>
                 <h3 class="h4 mb-3">{{ selectedItem.name || 'Unnamed location' }}</h3>
                 <p v-if="selectedKind === 'location' && selectedItem.description" class="mb-3">
@@ -149,6 +150,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/firebase/init'
+import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -170,25 +172,25 @@ const tripInformation = ref(null)
 let map
 let markers = []
 let originMarker
-let locationRequest = 0
-let directionsController
+let locationRequestId = 0
+let directionsRequestId = 0
 
+// Remove the previous route and stop older directions results from being shown.
 function clearRoute() {
-  if (directionsController) directionsController.abort()
-  directionsController = null
+  directionsRequestId += 1
   isRouting.value = false
   directionsError.value = ''
   tripInformation.value = null
-  if (map?.getLayer('trip-route')) map.removeLayer('trip-route')
-  if (map?.getSource('trip-route')) map.removeSource('trip-route')
+  if (!map) return
+  if (map.getLayer('trip-route')) map.removeLayer('trip-route')
+  if (map.getSource('trip-route')) map.removeSource('trip-route')
 }
 
 function drawRoute(geometry) {
   if (!map.isStyleLoaded()) throw new Error('The map style is not ready. Try directions again.')
   const bounds = new mapboxgl.LngLatBounds()
   for (const coordinates of geometry.coordinates) {
-    const [longitude, latitude] = coordinates
-    if (!hasValidLocation({ location: { longitude, latitude } })) {
+    if (!hasValidCoordinates(coordinates[0], coordinates[1])) {
       throw new Error('The directions response contains invalid coordinates.')
     }
     bounds.extend(coordinates)
@@ -222,46 +224,40 @@ async function getDirections() {
   }
 
   isRouting.value = true
-  const controller = new AbortController()
-  directionsController = controller
-  const timeout = setTimeout(() => controller.abort(), 15000)
+  const requestId = directionsRequestId
   try {
     const token = import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
     if (!token) throw new Error('Mapbox access token is missing.')
-    const coordinates =
-      origin.longitude +
-      ',' +
-      origin.latitude +
-      ';' +
-      destination.location.longitude +
-      ',' +
-      destination.location.latitude
-    const parameters = new URLSearchParams({
-      access_token: token,
-      geometries: 'geojson',
-      overview: 'full',
-      alternatives: 'false',
-      steps: 'false',
-    })
-    const response = await fetch(
-      'https://api.mapbox.com/directions/v5/mapbox/driving/' + coordinates + '?' + parameters,
-      { signal: controller.signal },
+    const start = `${origin.longitude},${origin.latitude}`
+    const end = `${destination.location.longitude},${destination.location.latitude}`
+    const response = await axios.get(
+      `https://api.mapbox.com/directions/v5/mapbox/driving/${start};${end}`,
+      {
+        params: {
+          access_token: token,
+          geometries: 'geojson',
+          overview: 'full',
+          alternatives: false,
+          steps: false,
+        },
+        timeout: 15000,
+      },
     )
-    if (!response.ok) throw new Error('Mapbox directions failed with status ' + response.status)
-    const data = await response.json()
-    if (directionsController !== controller || !map) return
+    if (requestId !== directionsRequestId || !map) return
+    const data = response.data
     if (data.code === 'NoRoute' || data.code === 'NoSegment') {
       directionsError.value = 'No route could be found.'
       return
     }
     if (data.code !== 'Ok') throw new Error('Mapbox directions returned ' + data.code)
-    const drivingRoute = data.routes?.[0]
-    if (!drivingRoute) {
+    if (!data.routes || data.routes.length === 0) {
       directionsError.value = 'No route could be found.'
       return
     }
+    const drivingRoute = data.routes[0]
     if (
-      drivingRoute.geometry?.type !== 'LineString' ||
+      !drivingRoute.geometry ||
+      drivingRoute.geometry.type !== 'LineString' ||
       !Array.isArray(drivingRoute.geometry.coordinates) ||
       drivingRoute.geometry.coordinates.length < 2 ||
       !Number.isFinite(drivingRoute.distance) ||
@@ -269,32 +265,28 @@ async function getDirections() {
       !Number.isFinite(drivingRoute.duration) ||
       drivingRoute.duration < 0
     ) {
-      throw new Error('Mapbox directions returned an invalid route.')
+      throw new Error('Mapbox returned invalid route information.')
     }
     drawRoute(drivingRoute.geometry)
     tripInformation.value = {
-      from: origin.name,
-      to: destination.name || 'Unnamed location',
       distanceKm: (drivingRoute.distance / 1000).toFixed(1),
       durationMinutes: Math.max(1, Math.round(drivingRoute.duration / 60)),
     }
   } catch (error) {
-    if (directionsController !== controller) return
+    if (requestId !== directionsRequestId) return
     clearRoute()
     directionsError.value = 'Unable to calculate directions.'
     console.error('Unable to calculate directions:', error)
   } finally {
-    clearTimeout(timeout)
-    if (directionsController === controller) {
-      directionsController = null
+    if (requestId === directionsRequestId) {
       isRouting.value = false
     }
   }
 }
 
 function setOriginLocation(name, longitude, latitude) {
-  if (!map || !hasValidLocation({ location: { longitude, latitude } })) return
-  locationRequest++
+  if (!map || !hasValidCoordinates(longitude, latitude)) return
+  locationRequestId += 1
   isLocating.value = false
   originError.value = ''
   clearRoute()
@@ -309,17 +301,19 @@ function setOriginLocation(name, longitude, latitude) {
 }
 
 function pinStartingLocation(event) {
-  if (event.originalEvent?.target?.closest?.('.mapboxgl-marker')) return
+  const clickedElement = event.originalEvent && event.originalEvent.target
+  if (clickedElement && clickedElement.closest('.mapboxgl-marker')) return
   setOriginLocation('Pinned location', event.lngLat.lng, event.lngLat.lat)
 }
 
 function useMyLocation() {
   if (isLocating.value || !map) return
   originError.value = ''
-  const request = ++locationRequest
+  locationRequestId += 1
+  const requestId = locationRequestId
 
   function locationFailed(error) {
-    if (request !== locationRequest || !map) return
+    if (requestId !== locationRequestId || !map) return
     isLocating.value = false
     originError.value =
       'Unable to access your current location. You can pin a location on the map instead.'
@@ -330,21 +324,25 @@ function useMyLocation() {
     locationFailed(new Error('Browser geolocation is unavailable.'))
     return
   }
+  // Use the browser's coordinates unless the user has already chosen another start.
+  function locationFound(position) {
+    if (requestId !== locationRequestId || !map) return
+    const longitude = position.coords.longitude
+    const latitude = position.coords.latitude
+    if (!hasValidCoordinates(longitude, latitude)) {
+      locationFailed(new Error('Browser geolocation returned invalid coordinates.'))
+      return
+    }
+    setOriginLocation('Your current location', longitude, latitude)
+  }
+
   isLocating.value = true
   try {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (request !== locationRequest || !map) return
-        const { longitude, latitude } = position.coords
-        if (!hasValidLocation({ location: { longitude, latitude } })) {
-          locationFailed(new Error('Browser geolocation returned invalid coordinates.'))
-          return
-        }
-        setOriginLocation('Your current location', longitude, latitude)
-      },
-      locationFailed,
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    )
+    navigator.geolocation.getCurrentPosition(locationFound, locationFailed, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    })
   } catch (error) {
     locationFailed(error)
   }
@@ -353,23 +351,22 @@ function useMyLocation() {
 async function loadMapData() {
   isLoading.value = true
   loadError.value = ''
-  const results = await Promise.allSettled([
-    getDocs(collection(db, 'events')),
-    getDocs(collection(db, 'locations')),
-  ])
 
-  if (results[0].status === 'fulfilled') {
-    events.value = results[0].value.docs.map((item) => ({ ...item.data(), id: item.id }))
-  } else {
-    loadError.value = 'Unable to load map data.'
-    console.error('Unable to load events:', results[0].reason)
-  }
-
-  if (results[1].status === 'fulfilled') {
-    locations.value = results[1].value.docs.map((item) => ({ ...item.data(), id: item.id }))
-  } else {
-    loadError.value = 'Unable to load map data.'
-    console.error('Unable to load locations:', results[1].reason)
+  for (const collectionName of ['events', 'locations']) {
+    try {
+      const snapshot = await getDocs(collection(db, collectionName))
+      const records = []
+      for (const document of snapshot.docs) {
+        const item = document.data()
+        item.id = document.id
+        records.push(item)
+      }
+      if (collectionName === 'events') events.value = records
+      else locations.value = records
+    } catch (error) {
+      loadError.value = 'Unable to load map data.'
+      console.error('Unable to load ' + collectionName + ':', error)
+    }
   }
 
   isLoading.value = false
@@ -382,7 +379,13 @@ function focusRequestedEvent() {
   eventMessage.value = ''
   const eventId = route.query.eventId
   if (typeof eventId !== 'string' || !eventId) return
-  const event = events.value.find((item) => item.id === eventId)
+  let event = null
+  for (const item of events.value) {
+    if (item.id === eventId) {
+      event = item
+      break
+    }
+  }
   if (!event) {
     clearRoute()
     selectedItem.value = null
@@ -390,9 +393,9 @@ function focusRequestedEvent() {
     eventMessage.value = 'The requested event could not be found.'
     return
   }
-  selectedFilter.value = 'events'
+  selectedFilter.value = mapCategory(event, true)
   updateMarkers()
-  selectEvent(event)
+  selectItem(event, 'event')
   if (!hasValidLocation(event)) {
     eventMessage.value = 'This event does not have a valid map location yet.'
     return
@@ -401,8 +404,11 @@ function focusRequestedEvent() {
 }
 
 function hasValidLocation(item) {
-  const latitude = item.location?.latitude
-  const longitude = item.location?.longitude
+  if (!item || !item.location) return false
+  return hasValidCoordinates(item.location.longitude, item.location.latitude)
+}
+
+function hasValidCoordinates(longitude, latitude) {
   return (
     Number.isFinite(latitude) &&
     Number.isFinite(longitude) &&
@@ -413,19 +419,13 @@ function hasValidLocation(item) {
   )
 }
 
-function selectEvent(event) {
+function selectItem(item, kind) {
   clearRoute()
-  selectedItem.value = event
-  selectedKind.value = 'event'
+  selectedItem.value = item
+  selectedKind.value = kind
 }
 
-function selectLocation(location) {
-  clearRoute()
-  selectedItem.value = location
-  selectedKind.value = 'location'
-}
-
-function addMarker(item, color, selectItem) {
+function addMarker(item, color, kind) {
   if (!hasValidLocation(item)) return
   const marker = new mapboxgl.Marker({ color })
     .setLngLat([item.location.longitude, item.location.latitude])
@@ -437,39 +437,15 @@ function addMarker(item, color, selectItem) {
   element.setAttribute('aria-label', 'Show details for ' + (item.name || 'location'))
   element.addEventListener('click', (event) => {
     event.stopPropagation()
-    selectItem(item)
+    selectItem(item, kind)
   })
   element.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      selectItem(item)
+      selectItem(item, kind)
     }
   })
   markers.push(marker)
-}
-
-function addEventMarkers() {
-  if (selectedFilter.value !== 'all' && selectedFilter.value !== 'events') return
-  for (const event of events.value) {
-    addMarker(event, '#0d6efd', selectEvent)
-  }
-}
-
-function addLocationMarkers() {
-  if (selectedFilter.value === 'events') return
-  for (const location of locations.value) {
-    if (selectedFilter.value !== 'all' && location.type !== selectedFilter.value) continue
-    let color = '#6c757d'
-    if (location.type === 'recycling') color = '#198754'
-    if (location.type === 'donation') color = '#6f42c1'
-    if (location.type === 'repair') color = '#fd7e14'
-    addMarker(location, color, selectLocation)
-  }
-}
-
-function removeMarkers() {
-  for (const marker of markers) marker.remove()
-  markers = []
 }
 
 function updateMarkers() {
@@ -478,19 +454,51 @@ function updateMarkers() {
   removeMarkers()
   selectedItem.value = null
   selectedKind.value = ''
-  addEventMarkers()
-  addLocationMarkers()
+
+  for (const event of events.value) {
+    if (selectedFilter.value !== 'all' && mapCategory(event, true) !== selectedFilter.value)
+      continue
+    addMarker(event, '#0d6efd', 'event')
+  }
+
+  for (const location of locations.value) {
+    if (selectedFilter.value !== 'all' && mapCategory(location) !== selectedFilter.value) continue
+    let color = '#6c757d'
+    if (location.type === 'recycling') color = '#198754'
+    if (location.type === 'donation') color = '#6f42c1'
+    if (location.type === 'repair') color = '#fd7e14'
+    addMarker(location, color, 'location')
+  }
 }
 
-function locationTypeLabel(type) {
-  if (type === 'recycling') return 'Recycling'
-  if (type === 'donation') return 'Donation'
-  if (type === 'repair') return 'Repair'
-  return type || 'Location'
+function removeMarkers() {
+  for (const marker of markers) marker.remove()
+  markers = []
+}
+
+// Return the category used by the filter, including records with older category names.
+function mapCategory(item, isEvent = false) {
+  if (item.category) {
+    if (item.category === 'Workshop') return 'Workshops'
+    if (
+      ['Donations', 'Workshops', 'Events', 'Recycling Centres', 'Repair Centres'].includes(
+        item.category,
+      )
+    )
+      return item.category
+  }
+  if (isEvent || item.type === 'event') return 'Events'
+  if (item.type === 'donation') return 'Donations'
+  if (item.type === 'repair') return 'Repair Centres'
+  if (item.type === 'workshop') return 'Workshops'
+  return 'Recycling Centres'
 }
 
 function formatDate(value) {
-  const date = typeof value.toDate === 'function' ? value.toDate() : new Date(value)
+  if (!value) return ''
+  let date
+  if (typeof value.toDate === 'function') date = value.toDate()
+  else date = new Date(value)
   if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : ''
   return date.toLocaleDateString('en-AU', {
     day: 'numeric',
@@ -502,7 +510,7 @@ function formatDate(value) {
 
 watch(() => route.query.eventId, focusRequestedEvent)
 
-onMounted(async () => {
+async function setupMap() {
   map = new mapboxgl.Map({
     accessToken: import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
     container: 'map',
@@ -512,10 +520,11 @@ onMounted(async () => {
   })
   map.on('click', pinStartingLocation)
   await loadMapData()
-})
+}
 
-onUnmounted(() => {
-  locationRequest++
+// Remove the map and markers, and ignore pending results when leaving the page.
+function closeMap() {
+  locationRequestId += 1
   clearRoute()
   if (originMarker) originMarker.remove()
   originMarker = null
@@ -524,5 +533,8 @@ onUnmounted(() => {
     map.remove()
     map = null
   }
-})
+}
+
+onMounted(setupMap)
+onUnmounted(closeMap)
 </script>

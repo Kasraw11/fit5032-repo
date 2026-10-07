@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    match /recycleItems/{document} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /locations/{document} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+
+      match /reviews/{userUid} {
+        allow read: if request.auth != null;
+
+        allow create, update: if request.auth != null
+          && request.auth.uid == userUid
+          && exists(/databases/$(database)/documents/events/$(eventId))
+          && request.resource.data.keys().hasOnly(['rating'])
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1
+          && request.resource.data.rating <= 5;
+      }
+    }
+
+    match /categorySubscriptions/{subscriptionId} {
+      allow read: if request.auth != null
+        && (resource.data.userId == request.auth.uid || isAdmin());
+
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if validSubscription();
+      allow update: if validSubscription()
+        && resource.data.userId == request.auth.uid;
+
+      function validSubscription() {
+        return request.auth != null
+          && request.resource.data.keys().hasAll(['userId', 'email', 'category'])
+          && request.resource.data.keys().hasOnly(['userId', 'email', 'category'])
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.email is string
+          && request.resource.data.email.size() <= 254
+          && request.resource.data.email.matches('^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$')
+          && request.resource.data.category is string
+          && request.resource.data.category in ['Donations', 'Workshops', 'Events', 'Recycling Centres', 'Repair Centres']
+          && subscriptionId == request.auth.uid + '_' + request.resource.data.category;
+      }
+    }
+
+    match /users/{userId} {
+      allow get: if request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}

@@ -31,15 +31,14 @@ import LoginView from '../views/LoginView.vue'
 import AccountView from '../views/AccountView.vue'
 import ProfileView from '../views/account/ProfileView.vue'
 import MyEventsView from '../views/account/MyEventsView.vue'
-import SupportView from '../views/account/SupportView.vue'
 
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
 import AdminUsersView from '../views/admin/AdminUsersView.vue'
-import AdminEventsView from '../views/admin/AdminEventsView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import AdminRecycleReuseView from '../views/admin/AdminRecycleReuseView.vue'
 import AdminOverviewView from '../views/admin/AdminOverviewView.vue'
 import AdminStatsView from '../views/admin/AdminStatsView.vue'
+import AdminReportsView from '../views/admin/AdminReportsView.vue'
 import AdminSettingsView from '../views/admin/AdminSettingsView.vue'
 import AdminNotificationsView from '../views/admin/AdminNotificationsView.vue'
 import AdminInboxView from '../views/admin/AdminInboxView.vue'
@@ -181,9 +180,7 @@ const routes = [
   },
   {
     path: '/account/support',
-    name: 'account-support',
-    component: SupportView,
-    meta: { requiresAuth: true },
+    redirect: '/contact',
   },
   {
     path: '/account/login',
@@ -210,7 +207,7 @@ const routes = [
   {
     path: '/admin/events',
     name: 'admin-events',
-    component: AdminEventsView,
+    redirect: '/admin/locations',
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
@@ -235,6 +232,12 @@ const routes = [
     path: '/admin/stats',
     name: 'admin-stats',
     component: AdminStatsView,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/reports',
+    name: 'admin-reports',
+    component: AdminReportsView,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {

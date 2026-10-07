@@ -6,15 +6,13 @@
       :image="public_hero"
     />
 
-    <div class="row">
+    <div class="row mt-4">
       <aside class="col-12 col-md-3 mb-3">
         <AccountSidebar />
       </aside>
 
       <section class="col-12 col-md-9">
-        <h1 class="h2 mb-3">Profile</h1>
-
-        <div class="card p-3">
+        <div class="card p-3 mb-3">
           <h2 class="h4 mb-3">Account Information</h2>
 
           <form v-if="isEditing" @submit.prevent="saveName">
@@ -29,11 +27,7 @@
 
           <p v-else><strong>Name:</strong> {{ currentUser?.displayName || 'User' }}</p>
 
-          <p><strong>Email:</strong> {{ currentUser?.email }}</p>
-
-          <p v-if="successMessage" class="text-success">
-            {{ successMessage }}
-          </p>
+          <FeedbackMessage v-model:message="successMessage" />
 
           <div class="mt-2">
             <button
@@ -71,6 +65,7 @@
 </template>
 
 <script setup>
+import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import { ref, triggerRef } from 'vue'
 import { getAuth, updateProfile } from 'firebase/auth'
 import AccountSidebar from '@/components/AccountSidebar.vue'

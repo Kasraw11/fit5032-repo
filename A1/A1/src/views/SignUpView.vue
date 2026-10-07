@@ -18,6 +18,7 @@
                 v-model="form.name"
                 type="text"
                 class="form-control"
+                :disabled="isLoading"
                 @blur="validateName(true)"
                 @input="validateName(false)"
               />
@@ -35,6 +36,7 @@
                 v-model="form.email"
                 type="email"
                 class="form-control"
+                :disabled="isLoading"
                 @blur="validateEmail(true)"
                 @input="validateEmail(false)"
               />
@@ -52,6 +54,7 @@
                 v-model="form.password"
                 type="password"
                 class="form-control"
+                :disabled="isLoading"
                 @blur="validatePassword(true)"
                 @input="validatePassword(false)"
               />
@@ -80,6 +83,7 @@
                 v-model="form.confirmPassword"
                 type="password"
                 class="form-control"
+                :disabled="isLoading"
                 placeholder="Confirm your password"
                 @blur="validateConfirmPassword(true)"
                 @input="validateConfirmPassword(false)"
@@ -91,16 +95,13 @@
             </div>
 
             <div class="text-center">
-              <button type="submit" class="btn btn-primary">Sign Up</button>
+              <button type="submit" class="btn btn-primary" :disabled="isLoading">Sign Up</button>
             </div>
+            <LoadingIndicator v-if="isLoading" class="mt-3" message="Creating your account..." />
 
-            <p v-if="successMessage" class="text-success mt-3">
-              {{ successMessage }}
-            </p>
+            <FeedbackMessage v-model:message="successMessage" />
 
-            <p v-if="authError" class="text-danger mt-3">
-              {{ authError }}
-            </p>
+            <FeedbackMessage v-model:message="authError" type="error" />
 
             <p class="mt-3">
               have an account?
@@ -114,9 +115,11 @@
 </template>
 
 <script setup>
+import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHero from '@/components/PageHero.vue'
+import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import sign_hero from '@/assets/images/sign_hero.png'
 import { createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth'
 
@@ -139,6 +142,7 @@ const errors = reactive({
 
 const authError = ref('')
 const successMessage = ref('')
+const isLoading = ref(false)
 
 const validateName = (blur) => {
   if (form.name.trim().length < 2) {
@@ -207,6 +211,7 @@ const validateConfirmPassword = (blur) => {
 }
 
 const submitForm = async () => {
+  if (isLoading.value) return
   successMessage.value = ''
   authError.value = ''
 
@@ -219,6 +224,7 @@ const submitForm = async () => {
     return
   }
 
+  isLoading.value = true
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -233,9 +239,8 @@ const submitForm = async () => {
     successMessage.value = 'Account created successfully! Redirecting...'
     console.log('Firebase user created')
 
-    setTimeout(() => {
-      router.push('/account')
-    }, 1000)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await router.push('/account')
   } catch (error) {
     switch (error.code) {
       case 'auth/email-already-in-use':
@@ -258,6 +263,8 @@ const submitForm = async () => {
         authError.value = 'Registration failed. Please try again.'
         console.error(error)
     }
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

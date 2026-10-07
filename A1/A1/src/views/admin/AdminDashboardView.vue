@@ -6,17 +6,7 @@
       :image="public_hero"
     />
     <section class="container py-5">
-      <div class="row g-4 mt-2">
-        <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
-              <h3 class="h4">Overview</h3>
-              <p>View system activity and key metrics.</p>
-              <RouterLink class="btn btn-primary" to="/admin/overview">Overview</RouterLink>
-            </div>
-          </div>
-        </div>
-
+      <div class="row g-4">
         <div class="col-12 col-md-6">
           <div class="card h-100 shadow-sm">
             <div class="card-body p-4">
@@ -30,18 +20,8 @@
         <div class="col-12 col-md-6">
           <div class="card h-100 shadow-sm">
             <div class="card-body p-4">
-              <h3 class="h4">Manage Events</h3>
-              <p>Manage sustainability events.</p>
-              <RouterLink class="btn btn-primary" to="/admin/events">Manage Events</RouterLink>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
               <h3 class="h4">Manage Locations</h3>
-              <p>Manage recycling, donation and repair locations.</p>
+              <p>Manage locations and events, including their descriptions and event dates.</p>
               <RouterLink class="btn btn-primary" to="/admin/locations"
                 >Manage Locations</RouterLink
               >
@@ -76,7 +56,9 @@
             <div class="card-body p-4">
               <h3 class="h4">Reports &amp; Export</h3>
               <p>View, search and export SmartLoop data.</p>
-              <button type="button" class="btn btn-primary" disabled>Reports &amp; Export</button>
+              <RouterLink class="btn btn-primary" to="/admin/reports"
+                >Reports &amp; Export</RouterLink
+              >
             </div>
           </div>
         </div>

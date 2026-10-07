@@ -14,7 +14,13 @@
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
 
-                <input id="email" v-model="form.email" type="email" class="form-control" />
+                <input
+                  id="email"
+                  v-model="form.email"
+                  type="email"
+                  class="form-control"
+                  :disabled="isLoading"
+                />
                 <p v-if="errors.email" class="text-danger mt-1">
                   {{ errors.email }}
                 </p>
@@ -23,17 +29,24 @@
               <div class="mb-4">
                 <label for="password" class="form-label">Password</label>
 
-                <input id="password" v-model="form.password" type="password" class="form-control" />
+                <input
+                  id="password"
+                  v-model="form.password"
+                  type="password"
+                  class="form-control"
+                  :disabled="isLoading"
+                />
                 <p v-if="errors.password" class="text-danger mt-1">
                   {{ errors.password }}
                 </p>
               </div>
 
-              <p v-if="loginError" class="text-danger">
-                {{ loginError }}
-              </p>
+              <FeedbackMessage v-model:message="loginError" type="error" />
 
-              <button type="submit" class="btn btn-primary w-100">Login</button>
+              <button type="submit" class="btn btn-primary w-100" :disabled="isLoading">
+                Login
+              </button>
+              <LoadingIndicator v-if="isLoading" class="mt-3" message="Logging in..." />
 
               <p class="account-link">
                 Don't have an account?
@@ -48,11 +61,13 @@
 </template>
 
 <script setup>
+import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { checkAdminRole, waitForAuthReady } from '@/authentication'
 import PageHero from '@/components/PageHero.vue'
+import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import public_hero from '@/assets/images/public_hero.png'
 
 const router = useRouter()
@@ -69,8 +84,10 @@ const errors = reactive({
 })
 
 const loginError = ref('')
+const isLoading = ref(false)
 
 const submitForm = async () => {
+  if (isLoading.value) return
   errors.email = ''
   errors.password = ''
   loginError.value = ''
@@ -87,6 +104,7 @@ const submitForm = async () => {
     return
   }
 
+  isLoading.value = true
   try {
     const result = await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
     await waitForAuthReady()
@@ -118,6 +136,8 @@ const submitForm = async () => {
         loginError.value = 'Login failed. Please try again.'
         console.error(error)
     }
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

@@ -27,14 +27,6 @@
       >
         My Events
       </RouterLink>
-      <RouterLink
-        class="list-group-item list-group-item-action"
-        active-class=""
-        exact-active-class="active"
-        to="/account/support"
-      >
-        Support
-      </RouterLink>
     </nav>
   </div>
 </template>

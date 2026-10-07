@@ -1,6 +1,5 @@
 @import './base.css';
 
-/* Global page styles */
 body {
   background:
     radial-gradient(circle at top left, rgba(173, 216, 230, 0.4), transparent 80%),
@@ -190,7 +189,6 @@ body {
   }
 }
 
-/* footer */
 .home-page {
   min-height: calc(100vh - 70px);
   display: flex;
@@ -238,7 +236,6 @@ body {
   color: #526f89;
 }
 
-/* Page transition animations */
 .page-enter-active,
 .page-leave-active {
   transition:

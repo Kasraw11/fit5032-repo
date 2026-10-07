@@ -118,6 +118,11 @@
         </div>
       </div>
     </section>
+    <section class="container pb-5">
+      <RouterLink class="btn btn-outline-primary" to="/account/my-events">
+        Manage event notifications
+      </RouterLink>
+    </section>
   </main>
 </template>
 
