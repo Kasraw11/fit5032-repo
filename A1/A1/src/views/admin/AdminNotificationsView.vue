@@ -176,7 +176,7 @@ async function submitForm() {
   if (!categories.includes(selectedCategory.value)) {
     categoryError.value = 'Please select a notification category.'
   } else if (!countLoaded.value) {
-    categoryError.value = 'Please load the subscriber count before sending.'
+    categoryError.value = ' load the subscriber count before sending.'
   } else if (subscriberCount.value === 0) {
     categoryError.value = 'No users are subscribed to this category.'
   }

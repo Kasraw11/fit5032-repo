@@ -9,7 +9,7 @@
     </div>
 
     <div class="row">
-      <aside class="col-12 col-md-3 mb-4">
+      <aside class="col-12 col-md-3 mb-3">
         <AccountSidebar />
       </aside>
 
@@ -37,9 +37,16 @@
             <div class="card h-100 p-3">
               <h2 class="h5">Saved Events</h2>
               <p>View events you saved for later.</p>
-              <RouterLink class="btn btn-primary" to="/account/my-events">
+              <RouterLink class="btn btn-primary btn-sm align-self-start" to="/account/my-events">
                 View saved events
               </RouterLink>
+            </div>
+          </div>
+          <div class="col-12 col-lg-4 mb-4">
+            <div class="card h-100 p-3">
+              <h2 class="h5">Reports &amp; Export</h2>
+              <p>Search recycling items and download CSV or TXT reports.</p>
+              <RouterLink class="btn btn-primary" to="/account/reports">View reports</RouterLink>
             </div>
           </div>
         </div>

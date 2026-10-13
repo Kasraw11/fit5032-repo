@@ -7,111 +7,200 @@
     />
 
     <section class="container py-5">
+      <div class="d-flex flex-wrap align-items-end gap-3 mb-4">
+        <fieldset class="mb-0">
+          <legend class="h6">View events as</legend>
+          <div class="btn-group">
+            <input
+              id="events-cards"
+              v-model="viewMode"
+              type="radio"
+              name="event-view"
+              value="cards"
+              class="btn-check"
+            />
+            <label for="events-cards" class="btn btn-outline-primary btn-sm">Cards</label>
+            <input
+              id="events-list"
+              v-model="viewMode"
+              type="radio"
+              name="event-view"
+              value="list"
+              class="btn-check"
+            />
+            <label for="events-list" class="btn btn-outline-primary btn-sm">List</label>
+          </div>
+        </fieldset>
+        <div>
+          <label for="event-category" class="form-label">Category</label>
+          <select
+            id="event-category"
+            v-model="selectedCategory"
+            class="form-select form-select-sm"
+            :disabled="isLoading"
+            @change="expandedEventId = ''"
+          >
+            <option value="">All categories</option>
+            <option v-for="category in eventCategories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+      </div>
       <p v-if="isLoading" role="status">Loading events...</p>
       <div v-else-if="loadError" class="alert alert-danger" role="alert">
         <p>{{ loadError }}</p>
         <button type="button" class="btn btn-outline-danger" @click="loadEvents">Try Again</button>
       </div>
       <p v-else-if="events.length === 0">No events are available yet.</p>
-      <div v-else class="row g-4">
-        <div v-for="event in events" :key="event.id" class="col-12 col-md-6">
-          <div class="card h-100">
+      <p v-else-if="filteredEvents.length === 0" role="status">No events match this category.</p>
+      <div v-else class="row" :class="viewMode === 'list' ? 'g-2 event-list' : 'g-4'">
+        <div
+          v-for="event in filteredEvents"
+          :key="event.id"
+          :class="viewMode === 'cards' ? 'col-12 col-md-6' : 'col-12'"
+        >
+          <div class="card card-gradient-2 h-100">
             <div class="card-body">
-              <h2 class="card-title h4">{{ event.name }}</h2>
-              <p class="card-text"><strong>Date:</strong> {{ formatDate(event.date) }}</p>
-              <p class="card-text">
-                <strong>Address:</strong> {{ event.address || 'Address not provided' }}
-              </p>
-              <p class="card-text">{{ event.description }}</p>
-
-              <RouterLink
-                v-if="hasValidLocation(event)"
-                class="btn btn-outline-primary mb-3"
-                :to="{ name: 'locations', query: { eventId: event.id } }"
-                >View on Map</RouterLink
-              >
-              <p v-else class="text-muted">Map location not available yet.</p>
-
-              <p v-if="loadingReviews[event.id]" role="status">Loading ratings...</p>
-              <div v-else-if="reviewLoadErrors[event.id]" class="mb-3">
-                <p class="text-danger" role="alert">{{ reviewLoadErrors[event.id] }}</p>
-                <button
-                  type="button"
-                  class="btn btn-outline-primary"
-                  :disabled="savingReviews[event.id]"
-                  @click="loadReviews(event.id)"
-                >
-                  Try Again
-                </button>
-              </div>
-              <div v-else>
-                <p class="mb-1">
-                  <strong>Average Rating: </strong>
-                  <span v-if="getRatingCount(event.id) > 0">
-                    {{ getAverageRating(event.id) }} / 5
+              <div class="event-summary">
+                <div class="event-heading">
+                  <h2 class="card-title" :class="viewMode === 'list' ? 'h6 mb-1' : 'h4'">
+                    {{ event.name }}
+                  </h2>
+                  <span v-if="viewMode === 'list'" class="badge bg-primary mb-1">
+                    {{ event.category || 'Uncategorised' }}
                   </span>
-                  <span v-else>No ratings yet</span>
-                </p>
-                <p class="mb-0">
-                  {{ getRatingCount(event.id) }}
-                  {{ getRatingCount(event.id) === 1 ? 'rating' : 'ratings' }}
-                </p>
-              </div>
+                  <p class="card-text"><strong>Date:</strong> {{ formatDate(event.date) }}</p>
+                </div>
+                <div v-if="viewMode === 'cards'">
+                  <p class="card-text">
+                    <strong>Address:</strong> {{ event.address || 'Address not provided' }}
+                  </p>
+                  <p class="card-text">{{ event.description }}</p>
 
-              <div class="mt-4">
-                <label :for="`rating-${event.id}`" class="form-label">Rating:</label>
-                <select
-                  :id="`rating-${event.id}`"
-                  v-model="selectedRatings[event.id]"
-                  class="form-select mb-3"
-                  :disabled="
-                    !currentUser ||
-                    loadingReviews[event.id] ||
-                    savingReviews[event.id] ||
-                    !!reviewLoadErrors[event.id]
-                  "
-                >
-                  <option value="">Choose a rating</option>
-                  <option v-for="rating in 5" :key="rating" :value="rating">
-                    {{ rating }}
-                  </option>
-                </select>
-                <div class="d-flex flex-wrap gap-2">
+                  <RouterLink
+                    v-if="hasValidLocation(event)"
+                    class="btn btn-outline-primary mb-3"
+                    :to="{ name: 'locations', query: { eventId: event.id } }"
+                    >View on Map</RouterLink
+                  >
+                  <p v-else class="text-muted">Map location not available yet.</p>
+                </div>
+                <div class="event-buttons d-flex flex-wrap gap-2">
+                  <button
+                    v-if="viewMode === 'list'"
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    :aria-expanded="expandedEventId === event.id"
+                    :aria-controls="'event-details-' + event.id"
+                    @click="expandedEventId = expandedEventId === event.id ? '' : event.id"
+                  >
+                    {{ expandedEventId === event.id ? 'Hide details' : 'View details' }}
+                  </button>
                   <button
                     type="button"
-                    class="btn btn-primary"
+                    class="btn btn-outline-primary btn-sm"
+                    @click="saveEvent(event)"
+                  >
+                    Save Event
+                  </button>
+                </div>
+                <p v-if="saveMessages[event.id]" class="text-success mt-3 mb-0" role="status">
+                  {{ saveMessages[event.id] }}
+                </p>
+              </div>
+              <div
+                v-show="viewMode === 'cards' || expandedEventId === event.id"
+                :id="'event-ratings-' + event.id"
+                class="event-interactions"
+              >
+                <div v-if="viewMode === 'list'" class="mb-3">
+                  <p v-if="event.category"><strong>Category:</strong> {{ event.category }}</p>
+                  <p><strong>Address:</strong> {{ event.address || 'Address not provided' }}</p>
+                  <p>{{ event.description }}</p>
+                  <RouterLink
+                    v-if="hasValidLocation(event)"
+                    class="btn btn-outline-primary btn-sm"
+                    :to="{ name: 'locations', query: { eventId: event.id } }"
+                    >View on Map</RouterLink
+                  >
+                  <p v-else class="text-muted">Map location not available yet.</p>
+                </div>
+                <p v-if="loadingReviews[event.id]" role="status">Loading ratings...</p>
+                <div v-else-if="reviewLoadErrors[event.id]" class="mb-3">
+                  <p class="text-danger" role="alert">{{ reviewLoadErrors[event.id] }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    :disabled="savingReviews[event.id]"
+                    @click="loadReviews(event.id)"
+                  >
+                    Try Again
+                  </button>
+                </div>
+                <div v-else>
+                  <p class="mb-1">
+                    <strong>Average Rating: </strong>
+                    <span v-if="getRatingCount(event.id) > 0">
+                      {{ getAverageRating(event.id) }} / 5
+                    </span>
+                    <span v-else>No ratings yet</span>
+                  </p>
+                  <p class="mb-0">
+                    {{ getRatingCount(event.id) }}
+                    {{ getRatingCount(event.id) === 1 ? 'rating' : 'ratings' }}
+                  </p>
+                </div>
+
+                <div class="mt-4">
+                  <label :for="`rating-${event.id}`" class="form-label">Rating:</label>
+                  <select
+                    :id="`rating-${event.id}`"
+                    v-model="selectedRatings[event.id]"
+                    class="form-select mb-3"
                     :disabled="
                       !currentUser ||
                       loadingReviews[event.id] ||
                       savingReviews[event.id] ||
                       !!reviewLoadErrors[event.id]
                     "
-                    @click="submitRating(event.id)"
                   >
-                    Submit Rating
-                  </button>
-                  <button type="button" class="btn btn-outline-primary" @click="saveEvent(event)">
-                    Save Event
-                  </button>
-                </div>
-                <p v-if="savingReviews[event.id]" class="mt-3 mb-0" role="status">
-                  Saving rating...
-                </p>
-                <p v-if="saveMessages[event.id]" class="text-success mt-3 mb-0">
-                  {{ saveMessages[event.id] }}
-                </p>
+                    <option value="">Choose a rating</option>
+                    <option v-for="rating in 5" :key="rating" :value="rating">
+                      {{ rating }}
+                    </option>
+                  </select>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      :disabled="
+                        !currentUser ||
+                        loadingReviews[event.id] ||
+                        savingReviews[event.id] ||
+                        !!reviewLoadErrors[event.id]
+                      "
+                      @click="submitRating(event.id)"
+                    >
+                      Submit Rating
+                    </button>
+                  </div>
+                  <p v-if="savingReviews[event.id]" class="mt-3 mb-0" role="status">
+                    Saving rating...
+                  </p>
 
-                <p
-                  v-if="messages[event.id]"
-                  class="mt-3 mb-0"
-                  role="status"
-                  :class="{
-                    'text-success': messages[event.id] === 'Your rating has been saved.',
-                    'text-danger': messages[event.id] !== 'Your rating has been saved.',
-                  }"
-                >
-                  {{ messages[event.id] }}
-                </p>
+                  <p
+                    v-if="messages[event.id]"
+                    class="mt-3 mb-0"
+                    role="status"
+                    :class="{
+                      'text-success': messages[event.id] === 'Your rating has been saved.',
+                      'text-danger': messages[event.id] !== 'Your rating has been saved.',
+                    }"
+                  >
+                    {{ messages[event.id] }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -127,7 +216,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { collection, doc, getDocs, setDoc } from 'firebase/firestore'
 import { db } from '@/firebase/init'
 import PageHero from '@/components/PageHero.vue'
@@ -135,6 +224,23 @@ import public_hero from '@/assets/images/public_hero.png'
 import { currentUser } from '@/authentication'
 
 const events = ref([])
+const viewMode = ref('cards')
+const expandedEventId = ref('')
+const selectedCategory = ref('')
+const eventCategories = computed(() => {
+  const categories = []
+  events.value.forEach((event) => {
+    const category = event.category || 'Uncategorised'
+    if (!categories.includes(category)) categories.push(category)
+  })
+  return categories.sort((a, b) => a.localeCompare(b))
+})
+const filteredEvents = computed(() =>
+  events.value.filter(
+    (event) =>
+      !selectedCategory.value || (event.category || 'Uncategorised') === selectedCategory.value,
+  ),
+)
 const isLoading = ref(false)
 const loadError = ref('')
 const selectedRatings = ref({})
@@ -312,3 +418,34 @@ function saveEvent(event) {
 }
 onMounted(loadEvents)
 </script>
+
+<style scoped>
+.event-summary,
+.event-interactions {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.event-list .card-body {
+  padding: 0.85rem 1rem;
+}
+
+.event-list .event-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.event-list .event-heading p {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+}
+
+.event-list .event-interactions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d9e2ea;
+}
+</style>

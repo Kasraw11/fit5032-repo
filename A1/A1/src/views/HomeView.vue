@@ -50,21 +50,21 @@
         </div>
 
         <div class="col-12 col-md-3">
-          <div class="card h-100 shadow-sm card-gradient-1">
+          <div class="card h-100 shadow-sm card-gradient-3">
             <div class="card-body p-4">
-              <h3 class="h4">Contact Us</h3>
-              <p>Give us feedback about our services.</p>
-              <RouterLink class="btn btn-primary" to="/contact">Contact Us</RouterLink>
+              <h3 class="h4">Community Events</h3>
+              <p>Discover local sustainability events and leave a rating.</p>
+              <RouterLink class="btn btn-primary" to="/events">View events</RouterLink>
             </div>
           </div>
         </div>
 
         <div class="col-12 col-md-3">
-          <div class="card h-100 shadow-sm card-gradient-2">
+          <div class="card h-100 shadow-sm card-gradient-4">
             <div class="card-body p-4">
-              <h3 class="h4">Community Events</h3>
-              <p>Discover local sustainability events and leave a rating.</p>
-              <RouterLink class="btn btn-primary" to="/events">View events</RouterLink>
+              <h3 class="h4">Contact Us</h3>
+              <p>Give us feedback about our services.</p>
+              <RouterLink class="btn btn-primary" to="/contact">Contact Us</RouterLink>
             </div>
           </div>
         </div>

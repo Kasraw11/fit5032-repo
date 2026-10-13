@@ -7,27 +7,6 @@
     />
 
     <div class="container py-5">
-      <section class="mb-4">
-        <div class="row">
-          <div class="col-12 col-md-6">
-            <label class="form-label" for="location-filter">Filter locations</label>
-            <select
-              class="form-select"
-              id="location-filter"
-              v-model="selectedFilter"
-              @change="updateMarkers"
-            >
-              <option value="all">All</option>
-              <option value="Donations">Donations</option>
-              <option value="Workshops">Workshops</option>
-              <option value="Events">Events</option>
-              <option value="Recycling Centres">Recycling Centres</option>
-              <option value="Repair Centres">Repair Centres</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
       <section class="mb-4" aria-label="Starting location">
         <button type="button" class="btn btn-primary" :disabled="isLocating" @click="useMyLocation">
           Use My Location
@@ -44,7 +23,73 @@
       <p v-if="loadError" class="text-danger" role="alert">{{ loadError }}</p>
       <p v-if="eventMessage" class="text-danger" role="alert">{{ eventMessage }}</p>
 
-      <div id="map" class="mb-4" style="height: 500px"></div>
+      <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-4">
+          <section
+            class="card card-gradient-7 shadow-sm map-list-card"
+            aria-labelledby="map-list-heading"
+          >
+            <div class="card-header card-gradient-1 border-0 p-3">
+              <h2 id="map-list-heading" class="h5 mb-0">Events &amp; Locations</h2>
+            </div>
+            <div class="card-body p-3 map-list-body">
+              <p class="small text-muted">Choose a type, then select an event or location.</p>
+              <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Filter by type">
+                <button
+                  v-for="type in mapTypes"
+                  :key="type"
+                  type="button"
+                  class="btn btn-sm"
+                  :class="selectedFilter === type ? 'btn-primary' : 'btn-outline-primary'"
+                  :aria-pressed="selectedFilter === type"
+                  @click="changeType(type)"
+                >
+                  {{ type === 'all' ? 'All' : type }}
+                </button>
+              </div>
+              <p v-if="!currentUser" class="small">
+                <RouterLink to="/account/login">Sign in</RouterLink> to see events on the map.
+              </p>
+              <p v-if="isLoading" role="status">Loading events and locations...</p>
+              <div v-else class="map-results" aria-label="Events and locations">
+                <p v-if="filteredMapItems.length === 0" class="text-muted mb-0" role="status">
+                  No events or locations match this type.
+                </p>
+                <article
+                  v-for="entry in filteredMapItems"
+                  :key="entry.kind + '-' + entry.item.id"
+                  class="border rounded p-3 mb-3"
+                  :class="{
+                    'border-primary':
+                      selectedItem?.id === entry.item.id && selectedKind === entry.kind,
+                  }"
+                >
+                  <span class="badge bg-primary mb-2">{{
+                    mapCategory(entry.item, entry.kind === 'event')
+                  }}</span>
+                  <h3 class="h6">{{ entry.item.name || 'Unnamed location' }}</h3>
+                  <p v-if="entry.item.date" class="small mb-1">{{ formatDate(entry.item.date) }}</p>
+                  <p class="small mb-2">{{ entry.item.address || 'Address not provided' }}</p>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    :aria-label="'Show details for ' + (entry.item.name || 'location')"
+                    @click="showMapItem(entry)"
+                  >
+                    {{ hasValidLocation(entry.item) ? 'View on map' : 'View details' }}
+                  </button>
+                  <p v-if="!hasValidLocation(entry.item)" class="small text-muted mt-2 mb-0">
+                    Map location is not available yet.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="col-12 col-lg-8">
+          <div id="map" style="height: 500px"></div>
+        </div>
+      </div>
 
       <div class="row g-4">
         <div class="col-12 col-md-6">
@@ -146,10 +191,11 @@
 <script setup>
 import PageHero from '@/components/PageHero.vue'
 import public_hero from '@/assets/images/public_hero.png'
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/firebase/init'
+import { currentUser } from '@/authentication'
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -159,6 +205,30 @@ const eventMessage = ref('')
 const events = ref([])
 const locations = ref([])
 const selectedFilter = ref('all')
+const mapTypes = ['all', 'Donations', 'Workshops', 'Events', 'Recycling Centres', 'Repair Centres']
+const filteredMapItems = computed(() => {
+  const entries = [
+    ...events.value.map((item) => ({ item, kind: 'event' })),
+    ...locations.value.map((item) => ({ item, kind: 'location' })),
+  ]
+  return entries.filter(
+    (entry) =>
+      selectedFilter.value === 'all' ||
+      mapCategory(entry.item, entry.kind === 'event') === selectedFilter.value,
+  )
+})
+
+function changeType(type) {
+  selectedFilter.value = type
+  updateMarkers()
+}
+
+function showMapItem(entry) {
+  selectItem(entry.item, entry.kind)
+  if (map && hasValidLocation(entry.item)) {
+    map.flyTo({ center: [entry.item.location.longitude, entry.item.location.latitude], zoom: 15 })
+  }
+}
 const selectedItem = ref(null)
 const selectedKind = ref('')
 const isLoading = ref(false)
@@ -353,6 +423,10 @@ async function loadMapData() {
   loadError.value = ''
 
   for (const collectionName of ['events', 'locations']) {
+    if (collectionName === 'events' && !currentUser.value) {
+      events.value = []
+      continue
+    }
     try {
       const snapshot = await getDocs(collection(db, collectionName))
       const records = []
@@ -371,6 +445,13 @@ async function loadMapData() {
 
   isLoading.value = false
   updateMarkers()
+  if (map) {
+    const bounds = new mapboxgl.LngLatBounds()
+    for (const item of [...events.value, ...locations.value]) {
+      if (hasValidLocation(item)) bounds.extend([item.location.longitude, item.location.latitude])
+    }
+    if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 40, maxZoom: 13 })
+  }
   focusRequestedEvent()
 }
 
@@ -515,7 +596,7 @@ async function setupMap() {
     accessToken: import.meta.env.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v12',
-    center: [145.13, -37.91],
+    center: [144.9631, -37.8136],
     zoom: 11,
   })
   map.on('click', pinStartingLocation)
@@ -538,3 +619,33 @@ function closeMap() {
 onMounted(setupMap)
 onUnmounted(closeMap)
 </script>
+
+<style scoped>
+.map-list-card {
+  height: 500px;
+  overflow: hidden;
+}
+
+.map-list-card .card-header {
+  flex-shrink: 0;
+}
+
+.map-list-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.map-list-body > :not(.map-results) {
+  flex-shrink: 0;
+}
+
+.map-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+</style>

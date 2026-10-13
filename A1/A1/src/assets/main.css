@@ -13,17 +13,30 @@ body {
 }
 
 .home-hero {
+  position: relative;
+  isolation: isolate;
   min-height: 500px;
-  background: url('@/assets/images/smartloop_hero.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: #191919;
   display: flex;
   align-items: bottom;
   justify-content: flex-start;
   text-align: left;
   padding: 3.5rem 1rem;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('@/assets/images/smartloop_hero.png') center / cover no-repeat;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - clamp(80px, 14vw, 160px)),
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, black calc(100% - clamp(80px, 14vw, 160px)), transparent);
 }
 
 .home-hero-content {
@@ -84,6 +97,12 @@ body {
 }
 
 .page-hero-image {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - clamp(60px, 10vw, 110px)),
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, black calc(100% - clamp(60px, 10vw, 110px)), transparent);
   position: absolute;
   inset: 0;
   width: 100%;

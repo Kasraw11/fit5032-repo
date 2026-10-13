@@ -1,11 +1,11 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Reports &amp; Export</h1>
-        <p>View, search and export SmartLoop data.</p>
-      </div>
-    </section>
+    <PageHero
+      v-if="showHero"
+      :title="itemsOnly ? 'Recycling Reports & Export' : 'Reports & Export'"
+      subtitle="View, search and export SmartLoop data."
+      :image="public_hero"
+    />
     <section class="container py-4">
       <p v-if="isLoading" role="status">Loading report data...</p>
       <div v-if="loadError" class="alert alert-danger" role="alert">
@@ -15,7 +15,12 @@
       <template v-if="dataLoaded">
         <section class="card p-3 p-md-4" aria-labelledby="report-heading">
           <h2 id="report-heading" class="h4 mb-3">Report Data</h2>
-          <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Choose report">
+          <div
+            v-if="!itemsOnly"
+            class="d-flex flex-wrap gap-2 mb-3"
+            role="group"
+            aria-label="Choose report"
+          >
             <button
               type="button"
               class="btn"
@@ -35,7 +40,27 @@
               Recycle &amp; Reuse
             </button>
           </div>
-          <h3 class="h5">{{ selectedReport === 'events' ? 'Events' : 'Recycle & Reuse Items' }}</h3>
+          <h3 class="h5">
+            {{ !itemsOnly && selectedReport === 'events' ? 'Events' : 'Recycle & Reuse Items' }}
+          </h3>
+          <p class="small text-muted">
+            Click a column heading to sort. Choose a category or use search to narrow the results.
+            Each page shows up to 10 records.
+          </p>
+          <div class="mb-3">
+            <label for="report-category" class="form-label">Category</label>
+            <select
+              id="report-category"
+              v-model="selectedCategory"
+              class="form-select"
+              @change="filterCategory"
+            >
+              <option value="">All categories</option>
+              <option v-for="category in reportCategories" :key="category" :value="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
           <div class="mb-3">
             <label for="report-search" class="form-label">Search this report</label>
             <div class="input-group">
@@ -56,32 +81,6 @@
               </button>
             </div>
           </div>
-          <fieldset class="mb-3">
-            <legend class="h6">Column filters</legend>
-            <div class="row g-2">
-              <div
-                v-for="(column, index) in reportColumns"
-                :key="selectedReport + column.title"
-                class="col-12 col-sm-6 col-lg-4"
-              >
-                <label :for="'report-filter-' + index" class="form-label">{{ column.title }}</label>
-                <input
-                  :id="'report-filter-' + index"
-                  v-model="columnSearch[index]"
-                  type="search"
-                  class="form-control"
-                  @input="searchColumn(index)"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              class="btn btn-outline-secondary btn-sm mt-2"
-              @click="clearFilters"
-            >
-              Clear column filters
-            </button>
-          </fieldset>
           <div class="table-responsive">
             <DataTable
               :key="selectedReport"
@@ -93,7 +92,9 @@
             >
               <caption class="visually-hidden">
                 {{
-                  selectedReport === 'events' ? 'Events report' : 'Recycle and reuse report'
+                  !itemsOnly && selectedReport === 'events'
+                    ? 'Events report'
+                    : 'Recycle and reuse report'
                 }}
               </caption>
             </DataTable>
@@ -102,27 +103,75 @@
 
         <section class="card p-3 p-md-4 mt-4" aria-labelledby="export-heading">
           <h2 id="export-heading" class="h4 mb-2">Export Data</h2>
-          <p class="text-muted mb-3">Download event or recycle item records as a CSV file.</p>
-          <div class="d-flex flex-wrap gap-2">
-            <button
-              type="button"
-              class="btn btn-outline-primary"
-              :disabled="!events.length"
-              @click="exportEvents"
-            >
-              Export Events CSV
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-primary"
-              :disabled="!recycleItems.length"
-              @click="exportItems"
-            >
-              Export Recycle Items CSV
-            </button>
-          </div>
+          <FeedbackMessage v-model:message="exportError" type="error" />
+          <p class="text-muted mb-3">
+            {{
+              itemsOnly
+                ? 'Download recycling item records as CSV or TXT files.'
+                : 'Download event or recycle item records as CSV or TXT files.'
+            }}
+          </p>
+          <fieldset class="mb-3">
+            <legend class="h6">File format</legend>
+            <div class="btn-group">
+              <input
+                id="export-csv"
+                v-model="exportFormat"
+                class="btn-check"
+                type="radio"
+                name="export-format"
+                value="csv"
+              />
+              <label class="btn btn-outline-primary" for="export-csv">CSV</label>
+              <input
+                id="export-txt"
+                v-model="exportFormat"
+                class="btn-check"
+                type="radio"
+                name="export-format"
+                value="txt"
+              />
+              <label class="btn btn-outline-primary" for="export-txt">TXT</label>
+            </div>
+          </fieldset>
+          <fieldset v-if="!itemsOnly" class="mb-3">
+            <legend class="h6">Report type</legend>
+            <div class="btn-group">
+              <input
+                id="export-events"
+                v-model="exportReport"
+                class="btn-check"
+                type="radio"
+                name="export-report"
+                value="events"
+              />
+              <label class="btn btn-outline-primary" for="export-events">Events</label>
+              <input
+                id="export-items"
+                v-model="exportReport"
+                class="btn-check"
+                type="radio"
+                name="export-report"
+                value="items"
+              />
+              <label class="btn btn-outline-primary" for="export-items">Items</label>
+            </div>
+          </fieldset>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm align-self-start"
+            :disabled="!exportRows.length"
+            @click="exportSelectedReport"
+          >
+            Export {{ !itemsOnly && exportReport === 'events' ? 'Events' : 'Items' }}
+            {{ exportFormat.toUpperCase() }}
+          </button>
+          <p v-if="!exportRows.length" class="small text-muted mt-2" role="status">
+            No records available for this report.
+          </p>
           <p class="small text-muted mt-2 mb-0">
-            CSV exports include all loaded records, including rows hidden by search or pagination.
+            Exports include all loaded records, including rows hidden by search or pagination. User
+            emails, IDs and roles are excluded.
           </p>
         </section>
       </template>
@@ -131,24 +180,40 @@
 </template>
 
 <script setup>
+import PageHero from '@/components/PageHero.vue'
+import public_hero from '@/assets/images/public_hero.png'
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/firebase/init'
+import { isAdmin } from '@/authentication'
 import DataTable from 'datatables.net-vue3'
 import DataTablesCore from 'datatables.net-bs5'
 import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
 
 DataTable.use(DataTablesCore)
 
+const props = defineProps({
+  itemsOnly: { type: Boolean, default: false },
+  showHero: { type: Boolean, default: true },
+})
+const itemsOnly = computed(() => props.itemsOnly || !isAdmin.value)
+
 const events = ref([])
 const recycleItems = ref([])
 const isLoading = ref(false)
 const dataLoaded = ref(false)
 const loadError = ref('')
-const selectedReport = ref('events')
+const exportError = ref('')
+const exportFormat = ref('csv')
+const exportReport = ref(itemsOnly.value ? 'items' : 'events')
+const exportRows = computed(() =>
+  !itemsOnly.value && exportReport.value === 'events' ? eventRows.value : itemRows.value,
+)
+const selectedReport = ref(itemsOnly.value ? 'items' : 'events')
 const reportTable = ref(null)
 const globalSearch = ref('')
-const columnSearch = ref([])
+const selectedCategory = ref('')
 let pageClosed = false
 
 const eventHeaders = ['Event Name', 'Category', 'Date', 'Location', 'Status']
@@ -187,11 +252,20 @@ const itemRows = computed(() => {
 })
 
 const reportRows = computed(() =>
-  selectedReport.value === 'events' ? eventRows.value : itemRows.value,
+  !itemsOnly.value && selectedReport.value === 'events' ? eventRows.value : itemRows.value,
 )
+const reportCategories = computed(() => {
+  const categories = []
+  reportRows.value.forEach((row) => {
+    const category = row[1]
+    if (category && !categories.includes(category)) categories.push(category)
+  })
+  return categories.sort((a, b) => a.localeCompare(b))
+})
+
 const reportColumns = computed(() => {
   const columns = []
-  const headers = selectedReport.value === 'events' ? eventHeaders : itemHeaders
+  const headers = !itemsOnly.value && selectedReport.value === 'events' ? eventHeaders : itemHeaders
   headers.forEach((title) => columns.push({ title, render: DataTablesCore.render.text() }))
   return columns
 })
@@ -222,15 +296,15 @@ async function loadData() {
   loadError.value = ''
   dataLoaded.value = false
   try {
-    const eventSnapshot = await getDocs(collection(db, 'events'))
+    const eventSnapshot = itemsOnly.value ? null : await getDocs(collection(db, 'events'))
     const itemSnapshot = await getDocs(collection(db, 'recycleItems'))
     if (pageClosed) return
     events.value = []
     recycleItems.value = []
-    eventSnapshot.forEach((document) => events.value.push(document.data()))
+    eventSnapshot?.forEach((document) => events.value.push(document.data()))
     itemSnapshot.forEach((document) => recycleItems.value.push(document.data()))
     globalSearch.value = ''
-    columnSearch.value = []
+    selectedCategory.value = ''
     dataLoaded.value = true
   } catch {
     loadError.value = 'Unable to load report data. Check your connection and try again.'
@@ -243,7 +317,7 @@ function selectReport(report) {
   if (selectedReport.value === report) return
   selectedReport.value = report
   globalSearch.value = ''
-  columnSearch.value = []
+  selectedCategory.value = ''
 }
 
 function searchReport() {
@@ -256,47 +330,93 @@ function clearGlobalSearch() {
   document.getElementById('report-search')?.focus()
 }
 
-function searchColumn(index) {
-  reportTable.value?.dt
-    .column(index)
-    .search(columnSearch.value[index] || '')
-    .draw()
-}
-
-function clearFilters() {
-  columnSearch.value = []
-  reportColumns.value.forEach((column, index) => {
-    reportTable.value?.dt.column(index).search('')
-  })
-  reportTable.value?.dt.draw()
+function filterCategory() {
+  reportTable.value?.dt.column(1).search(selectedCategory.value, { exact: true }).draw()
 }
 
 function csvCell(value) {
   let text = String(value ?? '')
-  if (/^[\s]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text
-  return '"' + text.replaceAll('"', '""') + '"'
+  if (/^[\s]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text)) {
+    text = "'" + text
+  }
+  text = text.replaceAll('"', '""')
+  return '"' + text + '"'
+}
+
+function downloadFile(content, filename, fileType) {
+  exportError.value = ''
+  let fileUrl = null
+  let downloadLink = null
+  try {
+    const file = new Blob([content], { type: fileType })
+    fileUrl = URL.createObjectURL(file)
+
+    downloadLink = document.createElement('a')
+    downloadLink.href = fileUrl
+    downloadLink.download = filename
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+  } catch {
+    exportError.value = 'Unable to download this report. Please try again.'
+  } finally {
+    if (downloadLink) downloadLink.remove()
+    if (fileUrl) {
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 1000)
+    }
+  }
 }
 
 function downloadCsv(headers, rows, filename) {
-  const lines = [headers.map(csvCell).join(',')]
-  rows.forEach((row) => lines.push(row.map(csvCell).join(',')))
-  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  const lines = []
+  const headerCells = []
+  for (const header of headers) {
+    headerCells.push(csvCell(header))
+  }
+  lines.push(headerCells.join(','))
+
+  for (const row of rows) {
+    const cells = []
+    for (const value of row) {
+      cells.push(csvCell(value))
+    }
+    lines.push(cells.join(','))
+  }
+
+  const content = '\uFEFF' + lines.join('\r\n')
+  downloadFile(content, filename, 'text/csv;charset=utf-8;')
 }
 
-function exportEvents() {
-  downloadCsv(eventHeaders, eventRows.value, 'smartloop-events.csv')
+function downloadTxt(title, headers, rows, filename) {
+  const lines = [title, 'Total records: ' + rows.length, '']
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    lines.push('Record ' + (rowIndex + 1))
+    for (let columnIndex = 0; columnIndex < headers.length; columnIndex++) {
+      const value = String(rows[rowIndex][columnIndex] ?? '').replace(/[\r\n\t]+/g, ' ')
+      lines.push(headers[columnIndex] + ': ' + value)
+    }
+    lines.push('')
+  }
+  downloadFile(lines.join('\r\n'), filename, 'text/plain;charset=utf-8;')
 }
 
-function exportItems() {
-  downloadCsv(itemHeaders, itemRows.value, 'smartloop-recycle-items.csv')
+function exportSelectedReport() {
+  const rows = exportRows.value
+  if (rows.length === 0) return
+
+  let headers = itemHeaders
+  let title = 'SmartLoop Recycle & Reuse Report'
+  let filename = 'smartloop-recycle-items'
+  if (!itemsOnly.value && exportReport.value === 'events') {
+    headers = eventHeaders
+    title = 'SmartLoop Events Report'
+    filename = 'smartloop-events'
+  }
+
+  if (exportFormat.value === 'txt') {
+    downloadTxt(title, headers, rows, filename + '.txt')
+  } else {
+    downloadCsv(headers, rows, filename + '.csv')
+  }
 }
 
 onMounted(loadData)

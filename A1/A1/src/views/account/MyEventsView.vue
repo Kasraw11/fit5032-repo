@@ -1,13 +1,16 @@
 <template>
   <main class="container-fluid p-3">
-    <div class="row">
+    <PageHero
+      title="My Events"
+      subtitle="Manage your saved events and notification preferences."
+      :image="public_hero"
+    />
+    <div class="row mt-4">
       <aside class="col-12 col-md-3 mb-3">
         <AccountSidebar />
       </aside>
 
-      <section class="col-6 col-md-6">
-        <h1 class="h2 mb-3">My Events</h1>
-
+      <section class="col-12 col-md-6">
         <div class="card card-gradient-1 shadow-sm mb-4 py-3">
           <h2 class="h5 p-1">Upcoming Events</h2>
           <p class="mb-0">Your upcoming events will appear here.</p>
@@ -19,11 +22,17 @@
         </div>
 
         <div class="card card-gradient-1 shadow-sm mb-4 py-3">
-          <h2 class="h5 p-1">Saved Events</h2>
+          <h2 ref="savedEventsHeading" class="h5 p-1" tabindex="-1">Saved Events</h2>
+          <FeedbackMessage v-model:message="savedEventMessage" />
+          <FeedbackMessage v-model:message="savedEventError" type="error" />
 
           <p v-if="savedEvents.length === 0" class="mb-0">You have not saved any events yet.</p>
 
-          <div v-for="event in savedEvents" :key="event.id" class="border rounded p-3 mt-3">
+          <div
+            v-for="event in savedEvents"
+            :key="event.id"
+            class="card card-gradient-7 shadow-sm mb-4 py-3"
+          >
             <h3 class="h6">{{ event.name }}</h3>
             <p><strong>Date:</strong> {{ event.date }}</p>
             <p>
@@ -39,10 +48,18 @@
                 typeof event.location.latitude === 'number' &&
                 typeof event.location.longitude === 'number'
               "
-              class="btn btn-outline-primary btn-sm"
+              class="btn btn-outline-primary btn-sm align-self-start"
               :to="{ name: 'locations', query: { eventId: event.id } }"
               >View on Map</RouterLink
             >
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm mt-2 align-self-start"
+              :aria-label="'Remove ' + event.name + ' from saved events'"
+              @click="removeSavedEvent(event.id)"
+            >
+              Remove saved event
+            </button>
           </div>
         </div>
         <form
@@ -128,8 +145,10 @@
 </template>
 
 <script setup>
+import PageHero from '@/components/PageHero.vue'
+import public_hero from '@/assets/images/public_hero.png'
 import FeedbackMessage from '@/components/FeedbackMessage.vue'
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { collection, doc, getDocs, query, where, writeBatch } from 'firebase/firestore'
 import { db } from '@/firebase/init'
@@ -137,8 +156,33 @@ import AccountSidebar from '@/components/AccountSidebar.vue'
 import { currentUser } from '@/authentication'
 
 const savedEvents = ref([])
+const savedEventsHeading = ref(null)
+const savedEventMessage = ref('')
+const savedEventError = ref('')
+
+async function removeSavedEvent(eventId) {
+  const user = currentUser.value
+  if (!user) return
+  savedEventMessage.value = ''
+  savedEventError.value = ''
+  try {
+    const storageKey = 'savedEvents-' + user.uid
+    const storedEvents = JSON.parse(localStorage.getItem(storageKey))
+    if (!Array.isArray(storedEvents)) throw new Error('Saved events unavailable.')
+    const remainingEvents = storedEvents.filter((event) => event.id !== eventId)
+    localStorage.setItem(storageKey, JSON.stringify(remainingEvents))
+    savedEvents.value = remainingEvents
+    savedEventMessage.value = 'Event removed from saved events.'
+    await nextTick()
+    savedEventsHeading.value?.focus()
+  } catch {
+    savedEventError.value = 'Unable to remove this saved event. Please try again.'
+  }
+}
 
 function loadSavedEvents() {
+  savedEventMessage.value = ''
+  savedEventError.value = ''
   savedEvents.value = []
   if (!currentUser.value) return
   try {

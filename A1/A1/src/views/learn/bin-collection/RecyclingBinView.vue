@@ -3,7 +3,7 @@
     <PageHeader
       title="Recycling Bin – Yellow Lid"
       subtitle="The yellow-lid recycling bin is for common recyclable household containers, packaging and paper products."
-      back-to="/learn/bin-collection"
+      back-to="/learn/a-z-recycling"
     />
 
     <section class="card card-body p-3 shadow">

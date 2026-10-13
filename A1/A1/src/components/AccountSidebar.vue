@@ -27,6 +27,14 @@
       >
         My Events
       </RouterLink>
+      <RouterLink
+        class="list-group-item list-group-item-action"
+        active-class=""
+        exact-active-class="active"
+        to="/account/reports"
+      >
+        Reports &amp; Export
+      </RouterLink>
     </nav>
   </div>
 </template>

@@ -31,9 +31,9 @@ import LoginView from '../views/LoginView.vue'
 import AccountView from '../views/AccountView.vue'
 import ProfileView from '../views/account/ProfileView.vue'
 import MyEventsView from '../views/account/MyEventsView.vue'
+import ReportsView from '../views/account/ReportsView.vue'
 
 import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
-import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminLocationsView from '../views/admin/AdminLocationsView.vue'
 import AdminRecycleReuseView from '../views/admin/AdminRecycleReuseView.vue'
 import AdminOverviewView from '../views/admin/AdminOverviewView.vue'
@@ -179,6 +179,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/account/reports',
+    name: 'account-reports',
+    component: ReportsView,
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/account/support',
     redirect: '/contact',
   },
@@ -196,12 +202,6 @@ const routes = [
     path: '/admin',
     name: 'admin',
     component: AdminDashboardView,
-    meta: { requiresAuth: true, requiresAdmin: true },
-  },
-  {
-    path: '/admin/users',
-    name: 'admin-users',
-    component: AdminUsersView,
     meta: { requiresAuth: true, requiresAdmin: true },
   },
   {

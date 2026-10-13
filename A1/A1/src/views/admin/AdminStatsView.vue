@@ -58,6 +58,12 @@
           <div class="row g-4">
             <div class="col-12 col-xl-4">
               <div class="card p-4 h-100 shadow-sm">
+                <h3 id="test-chart-heading" class="h5 mb-2">saved events by category</h3>
+                <div class="chart-container" role="img" aria-labelledby="test-chart-heading"></div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-4">
+              <div class="card p-4 h-100 shadow-sm">
                 <h3 class="h5 mb-2">Events by Category</h3>
                 <p class="small text-body-secondary mb-4">Number of events in each category</p>
                 <p v-if="!events.length" class="text-body-secondary py-5 text-center">

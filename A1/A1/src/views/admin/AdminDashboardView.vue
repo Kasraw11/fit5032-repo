@@ -2,21 +2,11 @@
   <main>
     <PageHero
       title="Admin Dashboard"
-      subtitle="Welcome to the admin dashboard. Here you can manage users, events, and other administrative tasks."
+      subtitle="Welcome to the admin dashboard. Here you can manage events, locations, and recycling information."
       :image="public_hero"
     />
     <section class="container py-5">
       <div class="row g-4">
-        <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
-              <h3 class="h4">Manage Users</h3>
-              <p>Manage SmartLoop users.</p>
-              <RouterLink class="btn btn-primary" to="/admin/users">Manage Users</RouterLink>
-            </div>
-          </div>
-        </div>
-
         <div class="col-12 col-md-6">
           <div class="card h-100 shadow-sm">
             <div class="card-body p-4">

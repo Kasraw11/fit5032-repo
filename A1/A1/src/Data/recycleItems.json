@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "name": "Plastic Bottle",
+    "category": "Plastic",
+    "bestOption": "Recycle",
+    "description": "A common plastic drink bottle used for water and soft drinks.",
+    "reuse": "Reuse it as a small storage container or for simple craft projects.",
+    "repair": "Plastic bottles are generally not suitable for repair.",
+    "recycle": "Empty and rinse the bottle before placing it in the recycling bin.",
+    "dispose": "If it cannot be recycled, place it in the general waste bin."
+  },
+  {
+    "id": 2,
+    "name": "Cardboard Box",
+    "category": "Paper",
+    "bestOption": "Recycle",
+    "description": "Cardboard packaging commonly used for deliveries and storage.",
+    "reuse": "Reuse the box for storage, moving items or packaging.",
+    "repair": "Small tears can be repaired using paper tape.",
+    "recycle": "Flatten the box before placing it in the recycling bin.",
+    "dispose": "Wet or heavily contaminated cardboard should go in general waste."
+  },
+  {
+    "id": 3,
+    "name": "Glass Jar",
+    "category": "Glass",
+    "bestOption": "Recycle",
+    "description": "A glass container commonly used for food and drinks.",
+    "reuse": "Reuse the jar for food storage, organising small items or craft projects.",
+    "repair": "Broken or cracked glass jars should not be repaired or reused.",
+    "recycle": "Empty and rinse the jar before placing it in the recycling bin.",
+    "dispose": "Broken glass should be wrapped safely and placed in general waste if required."
+  },
+  {
+    "id": 4,
+    "name": "Old Mobile Phone",
+    "category": "E-Waste",
+    "bestOption": "Recycle",
+    "description": "An electronic device containing reusable and recyclable materials.",
+    "reuse": "Donate or sell the phone if it is still working.",
+    "repair": "Consider replacing the battery, screen or other damaged parts.",
+    "recycle": "Take the phone to an approved e-waste recycling collection point.",
+    "dispose": "Do not place mobile phones in general household waste."
+  },
+  {
+    "id": 5,
+    "name": "Plastic Food Container",
+    "category": "Plastic",
+    "bestOption": "Recycle",
+    "description": "A plastic container commonly used for takeaway food or food storage.",
+    "reuse": "Reuse it for storing food or organising small household items.",
+    "repair": "Cracked plastic containers are generally not suitable for repair.",
+    "recycle": "Clean the container and check whether your local recycling service accepts it.",
+    "dispose": "If it is heavily damaged or contaminated, place it in general waste."
+  },
+  {
+    "id": 6,
+    "name": "Newspaper",
+    "category": "Paper",
+    "bestOption": "Recycle",
+    "description": "Printed paper commonly used for news and advertising.",
+    "reuse": "Reuse newspaper for wrapping, cleaning windows or craft projects.",
+    "repair": "Newspaper does not normally require repair.",
+    "recycle": "Place clean and dry newspaper in the paper recycling bin.",
+    "dispose": "Wet or heavily contaminated newspaper should go in general waste."
+  },
+  {
+    "id": 7,
+    "name": "Glass Bottle",
+    "category": "Glass",
+    "bestOption": "Recycle",
+    "description": "A glass bottle commonly used for drinks and food products.",
+    "reuse": "Reuse it for storage, decoration or craft projects if it is undamaged.",
+    "repair": "Cracked or broken glass bottles should not be repaired.",
+    "recycle": "Empty and rinse the bottle before recycling.",
+    "dispose": "Broken glass should be wrapped safely before placing it in general waste if required."
+  },
+  {
+    "id": 8,
+    "name": "Old Laptop",
+    "category": "E-Waste",
+    "bestOption": "Recycle",
+    "description": "A portable computer containing electronic components and recyclable materials.",
+    "reuse": "Donate or sell the laptop if it is still working.",
+    "repair": "Consider replacing the battery, storage drive, keyboard or screen.",
+    "recycle": "Take it to an approved e-waste recycling facility.",
+    "dispose": "Do not place laptops in household general waste."
+  },
+  {
+    "id": 9,
+    "name": "Plastic Shopping Bag",
+    "category": "Plastic",
+    "bestOption": "Reuse",
+    "description": "A lightweight plastic bag commonly used for carrying shopping.",
+    "reuse": "Reuse it as a bin liner, storage bag or shopping bag.",
+    "repair": "Small tears may be repaired with tape for temporary reuse.",
+    "recycle": "Take soft plastics to a suitable collection point if one is available.",
+    "dispose": "Place it in general waste if no recycling option is available."
+  },
+  {
+    "id": 10,
+    "name": "Cereal Box",
+    "category": "Paper",
+    "bestOption": "Recycle",
+    "description": "A lightweight cardboard box commonly used for packaged cereal.",
+    "reuse": "Reuse it for crafts, storage or organising documents.",
+    "repair": "Small tears can be repaired with paper tape.",
+    "recycle": "Flatten the box and place it in the paper recycling bin.",
+    "dispose": "Heavily contaminated cardboard should go in general waste."
+  }
+]

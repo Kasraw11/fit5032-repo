@@ -284,7 +284,15 @@
 
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
-import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore'
 import { db } from '@/firebase/init'
 
 const items = ref([])
@@ -477,6 +485,7 @@ async function saveItem() {
       })
       successMessage.value = 'Item updated.'
     } else {
+      itemData.createdAt = serverTimestamp()
       const newItem = await addDoc(collection(db, 'recycleItems'), itemData)
       items.value.push({ ...itemData, id: newItem.id })
       successMessage.value = 'Item added.'
