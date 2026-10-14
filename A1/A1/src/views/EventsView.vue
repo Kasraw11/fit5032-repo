@@ -38,7 +38,7 @@
             v-model="selectedCategory"
             class="form-select form-select-sm"
             :disabled="isLoading"
-            @change="expandedEventId = ''"
+            @change="closeDetails"
           >
             <option value="">All categories</option>
             <option v-for="category in eventCategories" :key="category" :value="category">
@@ -93,7 +93,7 @@
                     class="btn btn-outline-primary btn-sm"
                     :aria-expanded="expandedEventId === event.id"
                     :aria-controls="'event-details-' + event.id"
-                    @click="expandedEventId = expandedEventId === event.id ? '' : event.id"
+                    @click="toggleDetails(event.id)"
                   >
                     {{ expandedEventId === event.id ? 'Hide details' : 'View details' }}
                   </button>
@@ -111,7 +111,7 @@
               </div>
               <div
                 v-show="viewMode === 'cards' || expandedEventId === event.id"
-                :id="'event-ratings-' + event.id"
+                :id="'event-details-' + event.id"
                 class="event-interactions"
               >
                 <div v-if="viewMode === 'list'" class="mb-3">
@@ -158,12 +158,7 @@
                     :id="`rating-${event.id}`"
                     v-model="selectedRatings[event.id]"
                     class="form-select mb-3"
-                    :disabled="
-                      !currentUser ||
-                      loadingReviews[event.id] ||
-                      savingReviews[event.id] ||
-                      !!reviewLoadErrors[event.id]
-                    "
+                    :disabled="isRatingDisabled(event.id)"
                   >
                     <option value="">Choose a rating</option>
                     <option v-for="rating in 5" :key="rating" :value="rating">
@@ -174,12 +169,7 @@
                     <button
                       type="button"
                       class="btn btn-primary"
-                      :disabled="
-                        !currentUser ||
-                        loadingReviews[event.id] ||
-                        savingReviews[event.id] ||
-                        !!reviewLoadErrors[event.id]
-                      "
+                      :disabled="isRatingDisabled(event.id)"
                       @click="submitRating(event.id)"
                     >
                       Submit Rating
@@ -229,18 +219,23 @@ const expandedEventId = ref('')
 const selectedCategory = ref('')
 const eventCategories = computed(() => {
   const categories = []
-  events.value.forEach((event) => {
+  for (const event of events.value) {
     const category = event.category || 'Uncategorised'
     if (!categories.includes(category)) categories.push(category)
-  })
-  return categories.sort((a, b) => a.localeCompare(b))
+  }
+  return categories.sort()
 })
-const filteredEvents = computed(() =>
-  events.value.filter(
-    (event) =>
-      !selectedCategory.value || (event.category || 'Uncategorised') === selectedCategory.value,
-  ),
-)
+
+const filteredEvents = computed(() => {
+  if (selectedCategory.value === '') return events.value
+  const results = []
+  for (const event of events.value) {
+    const category = event.category || 'Uncategorised'
+    if (category === selectedCategory.value) results.push(event)
+  }
+  return results
+})
+
 const isLoading = ref(false)
 const loadError = ref('')
 const selectedRatings = ref({})
@@ -250,6 +245,26 @@ const reviews = ref({})
 const loadingReviews = ref({})
 const savingReviews = ref({})
 const reviewLoadErrors = ref({})
+
+function toggleDetails(eventId) {
+  if (expandedEventId.value === eventId) {
+    expandedEventId.value = ''
+  } else {
+    expandedEventId.value = eventId
+  }
+}
+
+function closeDetails() {
+  expandedEventId.value = ''
+}
+
+function isRatingDisabled(eventId) {
+  if (!currentUser.value) return true
+  if (loadingReviews.value[eventId]) return true
+  if (savingReviews.value[eventId]) return true
+  if (reviewLoadErrors.value[eventId]) return true
+  return false
+}
 
 function readSavedArray(key) {
   try {
@@ -266,7 +281,12 @@ async function loadEvents() {
   loadError.value = ''
   try {
     const snapshot = await getDocs(collection(db, 'events'))
-    events.value = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }))
+    events.value = []
+    for (const document of snapshot.docs) {
+      const event = document.data()
+      event.id = document.id
+      events.value.push(event)
+    }
     for (const event of events.value) {
       await loadReviews(event.id)
     }
@@ -339,8 +359,13 @@ async function loadReviews(eventId) {
     }
     reviews.value[eventId] = eventReviews
     if (user && currentUser.value?.uid === user.uid) {
-      const ownReview = eventReviews.find((review) => review.userId === user.uid)
-      selectedRatings.value[eventId] = ownReview ? ownReview.rating : ''
+      selectedRatings.value[eventId] = ''
+      for (const review of eventReviews) {
+        if (review.userId === user.uid) {
+          selectedRatings.value[eventId] = review.rating
+          break
+        }
+      }
     }
     return true
   } catch (error) {
@@ -392,11 +417,11 @@ function saveEvent(event) {
   const storageKey = `savedEvents-${user.uid}`
   const savedEvents = readSavedArray(storageKey)
 
-  const alreadySaved = savedEvents.some((savedEvent) => savedEvent.id === event.id)
-
-  if (alreadySaved) {
-    saveMessages.value[event.id] = 'This event is already saved.'
-    return
+  for (const savedEvent of savedEvents) {
+    if (savedEvent.id === event.id) {
+      saveMessages.value[event.id] = 'This event is already saved.'
+      return
+    }
   }
 
   const savedEvent = {

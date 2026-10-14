@@ -472,3 +472,5 @@ exports.findLocation = onRequest(
     }
   },
 )
+
+exports.getReuseIdeas = require("./reuseIdeas").getReuseIdeas

@@ -8,11 +8,11 @@
     />
     <section class="container py-4">
       <p v-if="isLoading" role="status">Loading report data...</p>
-      <div v-if="loadError" class="alert alert-danger" role="alert">
+      <div v-else-if="loadError" class="alert alert-danger" role="alert">
         <p>{{ loadError }}</p>
         <button class="btn btn-outline-danger" type="button" @click="loadData">Try Again</button>
       </div>
-      <template v-if="dataLoaded">
+      <template v-else-if="dataLoaded">
         <section class="card p-3 p-md-4" aria-labelledby="report-heading">
           <h2 id="report-heading" class="h4 mb-3">Report Data</h2>
           <div
@@ -207,9 +207,12 @@ const loadError = ref('')
 const exportError = ref('')
 const exportFormat = ref('csv')
 const exportReport = ref(itemsOnly.value ? 'items' : 'events')
-const exportRows = computed(() =>
-  !itemsOnly.value && exportReport.value === 'events' ? eventRows.value : itemRows.value,
-)
+const exportRows = computed(() => {
+  if (!itemsOnly.value && exportReport.value === 'events') {
+    return eventRows.value
+  }
+  return itemRows.value
+})
 const selectedReport = ref(itemsOnly.value ? 'items' : 'events')
 const reportTable = ref(null)
 const globalSearch = ref('')
@@ -231,7 +234,7 @@ const tableOptions = {
 
 const eventRows = computed(() => {
   const rows = []
-  events.value.forEach((event) => {
+  for (const event of events.value) {
     rows.push([
       event.name || '',
       event.category || '',
@@ -239,34 +242,48 @@ const eventRows = computed(() => {
       eventLocation(event),
       event.status || '',
     ])
-  })
+  }
   return rows
 })
 
 const itemRows = computed(() => {
   const rows = []
-  recycleItems.value.forEach((item) =>
-    rows.push([item.name || '', item.category || '', item.bestOption || '']),
-  )
+  for (const item of recycleItems.value) {
+    rows.push([item.name || '', item.category || '', item.bestOption || ''])
+  }
   return rows
 })
 
-const reportRows = computed(() =>
-  !itemsOnly.value && selectedReport.value === 'events' ? eventRows.value : itemRows.value,
-)
+const reportRows = computed(() => {
+  if (!itemsOnly.value && selectedReport.value === 'events') {
+    return eventRows.value
+  }
+  return itemRows.value
+})
 const reportCategories = computed(() => {
   const categories = []
-  reportRows.value.forEach((row) => {
+  for (const row of reportRows.value) {
     const category = row[1]
-    if (category && !categories.includes(category)) categories.push(category)
-  })
+    if (category && !categories.includes(category)) {
+      categories.push(category)
+    }
+  }
   return categories.sort((a, b) => a.localeCompare(b))
 })
 
 const reportColumns = computed(() => {
   const columns = []
-  const headers = !itemsOnly.value && selectedReport.value === 'events' ? eventHeaders : itemHeaders
-  headers.forEach((title) => columns.push({ title, render: DataTablesCore.render.text() }))
+  let headers = itemHeaders
+  if (!itemsOnly.value && selectedReport.value === 'events') {
+    headers = eventHeaders
+  }
+  for (const title of headers) {
+    columns.push({
+      title: title,
+      orderable: title !== 'Best Option' && title !== 'Location',
+      render: DataTablesCore.render.text(),
+    })
+  }
   return columns
 })
 
@@ -296,13 +313,23 @@ async function loadData() {
   loadError.value = ''
   dataLoaded.value = false
   try {
-    const eventSnapshot = itemsOnly.value ? null : await getDocs(collection(db, 'events'))
+    let eventSnapshot = null
+    if (!itemsOnly.value) {
+      eventSnapshot = await getDocs(collection(db, 'events'))
+    }
     const itemSnapshot = await getDocs(collection(db, 'recycleItems'))
     if (pageClosed) return
+
     events.value = []
     recycleItems.value = []
-    eventSnapshot?.forEach((document) => events.value.push(document.data()))
-    itemSnapshot.forEach((document) => recycleItems.value.push(document.data()))
+    if (eventSnapshot) {
+      for (const document of eventSnapshot.docs) {
+        events.value.push(document.data())
+      }
+    }
+    for (const document of itemSnapshot.docs) {
+      recycleItems.value.push(document.data())
+    }
     globalSearch.value = ''
     selectedCategory.value = ''
     dataLoaded.value = true

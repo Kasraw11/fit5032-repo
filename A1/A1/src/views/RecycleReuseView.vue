@@ -33,7 +33,7 @@
           </div>
         </div>
 
-        <div class="col-12 col-md-4 mb-4">
+        <div class="col-12 col-md-3 mb-4">
           <label for="category" class="form-label"> Filter by category </label>
 
           <select
@@ -51,53 +51,50 @@
       </div>
 
       <p v-if="isLoading" role="status">Loading recycling items...</p>
-      <div v-if="loadError" class="alert alert-danger" role="alert">
+      <div v-else-if="loadError" class="alert alert-danger" role="alert">
         <p>{{ loadError }}</p>
         <button type="button" class="btn btn-outline-danger" @click="loadItems">Try Again</button>
       </div>
-      <div v-if="!isLoading && !loadError" class="row">
-        <div v-for="item in filteredItems" :key="item.id" class="col-12 col-sm-6 mb-3">
+      <p v-else-if="filteredItems.length === 0">No items found.</p>
+      <div v-else class="row">
+        <div v-for="item in filteredItems" :key="item.id" class="col-12 col-md-3 mb-4">
           <div
-            class="card h-100 item-card card-gradient-1"
+            class="card h-100 p-3 item-card card-gradient-1"
             data-bs-toggle="modal"
             data-bs-target="#itemDetailsModal"
             @click="selectItem(item)"
           >
-            <div class="card-body">
-              <h2 class="h5">
-                {{ item.name }}
-              </h2>
+            <h2 class="h5">
+              {{ item.name }}
+            </h2>
 
-              <p>
-                <strong>Category:</strong>
-                {{ item.category }}
-              </p>
+            <p>
+              <strong>Category:</strong>
+              {{ item.category }}
+            </p>
 
-              <p>
-                {{ item.description }}
-              </p>
+            <p>
+              {{ item.description }}
+            </p>
 
-              <button
-                type="button"
-                class="btn btn-outline-primary w-20 mt-2"
-                data-bs-toggle="modal"
-                data-bs-target="#itemDetailsModal"
-                @click="selectItem(item)"
-              >
-                View details
-              </button>
-            </div>
+            <button type="button" class="btn btn-outline-primary align-self-start mt-2">
+              View details
+            </button>
           </div>
         </div>
       </div>
 
-      <p v-if="!isLoading && !loadError && filteredItems.length === 0">No items found.</p>
-
-      <div id="itemDetailsModal" class="modal fade" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h2 class="modal-title fs-5">
+      <div
+        id="itemDetailsModal"
+        class="modal fade"
+        tabindex="-1"
+        aria-hidden="true"
+        aria-labelledby="item-details-title"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+          <div class="modal-content rounded-4 overflow-hidden">
+            <div class="modal-header card-gradient-1 px-4">
+              <h2 id="item-details-title" class="modal-title fs-5">
                 {{ selectedItem?.name }}
               </h2>
 
@@ -109,25 +106,89 @@
               ></button>
             </div>
 
-            <div v-if="selectedItem" class="modal-body">
-              <p class="text-center">
-                <strong>{{ selectedItem.category }}</strong>
-              </p>
+            <div v-if="selectedItem" class="modal-body p-3 p-md-4">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge bg-primary">{{ selectedItem.category }}</span>
+                <span v-if="selectedItem.bestOption" class="small text-muted"
+                  >Best option: <strong>{{ selectedItem.bestOption }}</strong></span
+                >
+              </div>
 
               <h3 class="h6">Item Details</h3>
               <p>{{ selectedItem.description }}</p>
 
-              <h3 class="h6">Reuse Options</h3>
-              <p>{{ selectedItem.reuse }}</p>
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6">
+                  <section class="card card-gradient-2 p-3 h-100">
+                    <h3 class="h6">Reuse Options</h3>
+                    <p class="small mb-0">
+                      {{ selectedItem.reuse || 'No reuse information provided yet.' }}
+                    </p>
+                  </section>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <section class="card card-gradient-4 p-3 h-100">
+                    <h3 class="h6">Repair Options</h3>
+                    <p class="small mb-0">
+                      {{ selectedItem.repair || 'No repair information provided yet.' }}
+                    </p>
+                  </section>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <section class="card card-gradient-1 p-3 h-100">
+                    <h3 class="h6">Recycle Instructions</h3>
+                    <p class="small mb-0">
+                      {{ selectedItem.recycle || 'No recycling information provided yet.' }}
+                    </p>
+                  </section>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <section class="card card-gradient-7 p-3 h-100">
+                    <h3 class="h6">Disposal Instructions</h3>
+                    <p class="small mb-0">
+                      {{ selectedItem.dispose || 'No disposal information provided yet.' }}
+                    </p>
+                  </section>
+                </div>
+              </div>
 
-              <h3 class="h6">Repair Options</h3>
-              <p>{{ selectedItem.repair || 'No repair information provided yet.' }}</p>
-
-              <h3 class="h6">Recycle Instructions</h3>
-              <p>{{ selectedItem.recycle }}</p>
-
-              <h3 class="h6">Disposal Instructions</h3>
-              <p>{{ selectedItem.dispose }}</p>
+              <section class="card card-gradient-1 p-3" aria-labelledby="reuse-ideas-title">
+                <h3 id="reuse-ideas-title" class="h6">AI reuse ideas</h3>
+                <p v-if="!currentUser" class="small">
+                  <RouterLink to="/account/login">Sign in</RouterLink> to get reuse ideas.
+                </p>
+                <div v-else>
+                  <p class="small text-muted">Get three ideas for reusing this item.</p>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    :disabled="isGettingIdeas"
+                    @click="getReuseIdeas"
+                  >
+                    {{ isGettingIdeas ? 'Getting ideas...' : 'Suggest ways to reuse this' }}
+                  </button>
+                  <p v-if="isGettingIdeas" class="mt-2" role="status">
+                    Generating three reuse ideas...
+                  </p>
+                  <p id="reuse-error" v-show="aiError" class="text-danger mt-2" role="alert">
+                    {{ aiError }}
+                  </p>
+                  <div
+                    v-if="reuseIdeas.length"
+                    class="card card-gradient-2 p-3 mt-3 small"
+                    aria-live="polite"
+                    aria-labelledby="reuse-results-title"
+                  >
+                    <h4 id="reuse-results-title" class="h6 mb-2">Your reuse ideas</h4>
+                    <ol class="ps-3 mb-2">
+                      <li v-for="idea in reuseIdeas" :key="idea" class="mb-1">{{ idea }}</li>
+                    </ol>
+                    <p class="small text-muted mb-0">
+                      AI-generated suggestions. Check that an idea is safe for your item.
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -150,9 +211,11 @@
 </style>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
-import { db } from '@/firebase/init'
+import { auth, db } from '@/firebase/init'
+import { currentUser } from '@/authentication'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 import PageHero from '@/components/PageHero.vue'
 import public_hero from '@/assets/images/public_hero.png'
 
@@ -165,6 +228,67 @@ const searchInput = ref(null)
 const selectedCategory = ref('')
 
 const selectedItem = ref(null)
+const reuseIdeas = ref([])
+const aiError = ref('')
+const isGettingIdeas = ref(false)
+const requestReuseIdeas = httpsCallable(getFunctions(auth.app, 'us-central1'), 'getReuseIdeas', {
+  timeout: 45000,
+})
+let aiRequestId = 0
+
+function resetReuseIdeas() {
+  aiRequestId += 1
+  reuseIdeas.value = []
+  aiError.value = ''
+  isGettingIdeas.value = false
+}
+
+async function getReuseIdeas() {
+  if (isGettingIdeas.value || !selectedItem.value) return
+  aiError.value = ''
+  reuseIdeas.value = []
+  if (!currentUser.value) {
+    aiError.value = 'Please sign in to get reuse ideas.'
+    return
+  }
+  const requestId = ++aiRequestId
+  isGettingIdeas.value = true
+  try {
+    const response = await requestReuseIdeas({
+      itemId: selectedItem.value.id,
+    })
+    if (requestId !== aiRequestId) return
+    const ideas = response.data.ideas
+    if (
+      !Array.isArray(ideas) ||
+      ideas.length !== 3 ||
+      ideas.some((idea) => typeof idea !== 'string')
+    ) {
+      throw new Error('Invalid ideas response.')
+    }
+    reuseIdeas.value = ideas
+  } catch (error) {
+    if (requestId !== aiRequestId) return
+    if (error.code === 'functions/resource-exhausted') {
+      aiError.value =
+        'Please wait 15 seconds and try again. You can make up to 20 requests per day.'
+    } else if (error.code === 'functions/unauthenticated') {
+      aiError.value = 'Please sign in again to get reuse ideas.'
+    } else if (error.code === 'functions/deadline-exceeded') {
+      aiError.value = 'The AI service took too long. Please try again.'
+    } else if (error.code === 'functions/failed-precondition') {
+      aiError.value = 'The AI service needs a configuration update. Please contact support.'
+    } else if (error.code === 'functions/not-found') {
+      aiError.value = 'The AI service or selected item is unavailable. Please try again later.'
+    } else {
+      aiError.value = 'Unable to get reuse ideas. Please try again later.'
+    }
+  } finally {
+    if (requestId === aiRequestId) isGettingIdeas.value = false
+  }
+}
+
+watch(() => currentUser.value?.uid, resetReuseIdeas)
 
 const categories = computed(() => {
   const categoryList = []
@@ -211,6 +335,7 @@ const loadItems = async () => {
 }
 
 const selectItem = (item) => {
+  resetReuseIdeas()
   selectedItem.value = item
 }
 
