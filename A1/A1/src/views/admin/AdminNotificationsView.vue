@@ -94,6 +94,33 @@
             </p>
           </div>
 
+          <div class="mb-3">
+            <label for="notify-image" class="form-label">Image attachment (optional)</label>
+            <input
+              id="notify-image"
+              ref="imageInput"
+              type="file"
+              class="form-control"
+              accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+              :class="{ 'is-invalid': imageError }"
+              :aria-invalid="Boolean(imageError)"
+              :aria-describedby="imageError ? 'image-help image-error' : 'image-help'"
+              @change="chooseImage"
+            />
+            <p id="image-help" class="form-text">One PNG or JPG image, smaller than 3 MB.</p>
+            <p v-if="imageError" id="image-error" class="text-danger" role="alert">
+              {{ imageError }}
+            </p>
+            <button
+              v-if="image"
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              @click="removeImage"
+            >
+              Remove image
+            </button>
+          </div>
+
           <button type="submit" class="btn btn-primary" :disabled="isLoadingCount">
             {{
               subscriberCount > 0
@@ -132,7 +159,46 @@ const messageError = ref('')
 const isSending = ref(false)
 const notice = ref('')
 const sendError = ref('')
+const image = ref(null)
+const imageInput = ref(null)
+const imageError = ref('')
 const bulkEmailUrl = import.meta.env.VITE_BULK_EMAIL_FUNCTION_URL
+
+function validateImage() {
+  imageError.value = ''
+  if (!image.value) return
+  const file = image.value
+  const filename = file.name.toLowerCase()
+  const isPng = file.type === 'image/png' && filename.endsWith('.png')
+  const isJpg =
+    file.type === 'image/jpeg' && (filename.endsWith('.jpg') || filename.endsWith('.jpeg'))
+  if (!isPng && !isJpg) imageError.value = 'Please select a PNG or JPG image.'
+  else if (file.size === 0 || file.size >= 3 * 1024 * 1024)
+    imageError.value = 'Choose an image smaller than 3 MB that is not empty.'
+}
+
+function chooseImage(event) {
+  image.value = event.target.files[0] || null
+  notice.value = ''
+  sendError.value = ''
+  validateImage()
+}
+
+function removeImage() {
+  image.value = null
+  imageError.value = ''
+  if (imageInput.value) imageInput.value.value = ''
+}
+
+function readImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).split(',')[1])
+    reader.onerror = reject
+    reader.onabort = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 async function loadSubscriberCount() {
   const category = selectedCategory.value
@@ -155,11 +221,10 @@ async function loadSubscriberCount() {
     if (selectedCategory.value !== category) return
     subscriberCount.value = snapshot.size
     countLoaded.value = true
-  } catch (error) {
+  } catch {
     if (selectedCategory.value === category) {
       countError.value = 'Unable to load subscriber count. Please try again.'
     }
-    console.error('Subscriber count failed:', error.code)
   } finally {
     if (selectedCategory.value === category) isLoadingCount.value = false
   }
@@ -182,38 +247,43 @@ async function submitForm() {
   }
   if (!subject.value.trim()) subjectError.value = 'Please enter an email subject.'
   if (!message.value.trim()) messageError.value = 'Please enter a message.'
+  validateImage()
 
   let invalidField = ''
   if (categoryError.value) invalidField = 'notify-category'
   else if (subjectError.value) invalidField = 'notify-subject'
   else if (messageError.value) invalidField = 'notify-message'
+  else if (imageError.value) invalidField = 'notify-image'
   if (invalidField) {
     document.getElementById(invalidField)?.focus()
     return
   }
   if (!auth.currentUser || !bulkEmailUrl) {
     sendError.value = 'Unable to send notification emails.'
-    console.error('Notification service URL or signed-in user is missing.')
+
     return
   }
 
   isSending.value = true
   try {
     const token = await auth.currentUser.getIdToken()
-    const response = await axios.post(
-      bulkEmailUrl,
-      {
-        category: selectedCategory.value,
-        subject: subject.value.trim(),
-        message: message.value.trim(),
-      },
-      {
-        headers: { Authorization: 'Bearer ' + token },
-        timeout: 310000,
-      },
-    )
+    const emailData = {
+      category: selectedCategory.value,
+      subject: subject.value.trim(),
+      message: message.value.trim(),
+    }
+    if (image.value) {
+      const file = image.value
+      const content = await readImage(file)
+      emailData.attachment = { filename: file.name, type: file.type, content }
+    }
+    const response = await axios.post(bulkEmailUrl, emailData, {
+      headers: { Authorization: 'Bearer ' + token },
+      timeout: 310000,
+    })
     if (!response.data.success) throw new Error('Notification request failed.')
     notice.value = 'Notification sent to ' + response.data.sentCount + ' subscribers.'
+    removeImage()
   } catch (error) {
     sendError.value = 'Unable to send notification emails.'
     if (error.response?.data?.message === 'No subscribers found for this category.') {
@@ -223,7 +293,6 @@ async function submitForm() {
       sendError.value +=
         ' ' + error.response.data.sentCount + ' subscribers already received this notification.'
     }
-    console.error('Notification request failed:', error.message, error.response?.status)
   } finally {
     isSending.value = false
   }

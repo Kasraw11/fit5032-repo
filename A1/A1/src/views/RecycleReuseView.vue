@@ -18,18 +18,9 @@
               v-model="searchTerm"
               type="search"
               class="form-control"
-              placeholder="For example, jar or glass"
+              placeholder="Type an item name or category"
               :disabled="isLoading"
             />
-            <button
-              v-if="searchTerm"
-              type="button"
-              class="btn btn-outline-secondary"
-              :disabled="isLoading"
-              @click="clearSearch"
-            >
-              Clear
-            </button>
           </div>
         </div>
 
@@ -59,7 +50,7 @@
       <div v-else class="row">
         <div v-for="item in filteredItems" :key="item.id" class="col-12 col-md-3 mb-4">
           <div
-            class="card h-100 p-3 item-card card-gradient-1"
+            class="card h-100 p-3 selectable-card card-gradient-1"
             data-bs-toggle="modal"
             data-bs-target="#itemDetailsModal"
             @click="selectItem(item)"
@@ -76,10 +67,6 @@
             <p>
               {{ item.description }}
             </p>
-
-            <button type="button" class="btn btn-outline-primary align-self-start mt-2">
-              View details
-            </button>
           </div>
         </div>
       </div>
@@ -109,9 +96,9 @@
             <div v-if="selectedItem" class="modal-body p-3 p-md-4">
               <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                 <span class="badge bg-primary">{{ selectedItem.category }}</span>
-                <span v-if="selectedItem.bestOption" class="small text-muted"
-                  >Best option: <strong>{{ selectedItem.bestOption }}</strong></span
-                >
+                <span class="small text-muted">
+                  Best option: <strong>{{ selectedItem.bestOption || 'Not specified' }}</strong>
+                </span>
               </div>
 
               <h3 class="h6">Item Details</h3>
@@ -152,12 +139,13 @@
                 </div>
               </div>
 
-              <section class="card card-gradient-1 p-3" aria-labelledby="reuse-ideas-title">
+              <section
+                v-if="currentUser"
+                class="card card-gradient-1 p-3"
+                aria-labelledby="reuse-ideas-title"
+              >
                 <h3 id="reuse-ideas-title" class="h6">AI reuse ideas</h3>
-                <p v-if="!currentUser" class="small">
-                  <RouterLink to="/account/login">Sign in</RouterLink> to get reuse ideas.
-                </p>
-                <div v-else>
+                <div>
                   <p class="small text-muted">Get three ideas for reusing this item.</p>
                   <button
                     type="button"
@@ -170,9 +158,7 @@
                   <p v-if="isGettingIdeas" class="mt-2" role="status">
                     Generating three reuse ideas...
                   </p>
-                  <p id="reuse-error" v-show="aiError" class="text-danger mt-2" role="alert">
-                    {{ aiError }}
-                  </p>
+
                   <div
                     v-if="reuseIdeas.length"
                     class="card card-gradient-2 p-3 mt-3 small"
@@ -196,19 +182,6 @@
     </div>
   </main>
 </template>
-
-<style scoped>
-.item-card {
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.item-card:hover {
-  transform: translateY(-5px);
-}
-</style>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
@@ -267,22 +240,9 @@ async function getReuseIdeas() {
       throw new Error('Invalid ideas response.')
     }
     reuseIdeas.value = ideas
-  } catch (error) {
+  } catch {
     if (requestId !== aiRequestId) return
-    if (error.code === 'functions/resource-exhausted') {
-      aiError.value =
-        'Please wait 15 seconds and try again. You can make up to 20 requests per day.'
-    } else if (error.code === 'functions/unauthenticated') {
-      aiError.value = 'Please sign in again to get reuse ideas.'
-    } else if (error.code === 'functions/deadline-exceeded') {
-      aiError.value = 'The AI service took too long. Please try again.'
-    } else if (error.code === 'functions/failed-precondition') {
-      aiError.value = 'The AI service needs a configuration update. Please contact support.'
-    } else if (error.code === 'functions/not-found') {
-      aiError.value = 'The AI service or selected item is unavailable. Please try again later.'
-    } else {
-      aiError.value = 'Unable to get reuse ideas. Please try again later.'
-    }
+    aiError.value = 'Unable to get reuse ideas. Please try again later.'
   } finally {
     if (requestId === aiRequestId) isGettingIdeas.value = false
   }
@@ -314,11 +274,6 @@ const filteredItems = computed(() => {
   })
 })
 
-const clearSearch = () => {
-  searchTerm.value = ''
-  searchInput.value?.focus()
-}
-
 const loadItems = async () => {
   if (isLoading.value) return
   isLoading.value = true
@@ -326,9 +281,8 @@ const loadItems = async () => {
   try {
     const snapshot = await getDocs(collection(db, 'recycleItems'))
     recycleItems.value = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }))
-  } catch (error) {
+  } catch {
     loadError.value = 'Unable to load recycling items. Please try again.'
-    console.error('Unable to load recycling items:', error)
   } finally {
     isLoading.value = false
   }

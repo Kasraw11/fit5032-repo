@@ -56,13 +56,7 @@
                 :disabled="isLoading"
                 @click="signInWithGoogle"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 48 48"
-                  aria-hidden="true"
-                  focusable="false"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24">
                   <path
                     fill="#4285F4"
                     d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.17v5.12h6.61c3.87-3.57 6.08-8.83 6.08-14.79z"
@@ -88,7 +82,9 @@
 
               <p class="account-link">
                 Don't have an account?
-                <RouterLink to="/signup">Create account</RouterLink>
+                <RouterLink to="/signup" class="btn btn-outline-primary mt-2">
+                  Create account
+                </RouterLink>
               </p>
             </form>
           </div>
@@ -129,6 +125,14 @@ const successMessage = ref('')
 const isLoading = ref(false)
 const googleError = ref('')
 
+function resetMessages() {
+  successMessage.value = ''
+  googleError.value = ''
+  loginError.value = ''
+  errors.email = ''
+  errors.password = ''
+}
+
 async function redirectAfterLogin(user) {
   await waitForAuthReady()
   const adminAllowed = await checkAdminRole(user)
@@ -139,11 +143,7 @@ async function redirectAfterLogin(user) {
 
 async function signInWithGoogle() {
   if (isLoading.value) return
-  successMessage.value = ''
-  googleError.value = ''
-  loginError.value = ''
-  errors.email = ''
-  errors.password = ''
+  resetMessages()
   isLoading.value = true
   try {
     const result = await signInWithPopup(auth, googleProvider)
@@ -158,59 +158,22 @@ async function signInWithGoogle() {
           })
         }
       })
-    } catch (error) {
+    } catch {
       await logout()
-      googleError.value =
-        error.code === 'permission-denied'
-          ? 'Unable to create your profile. Please contact support or use email and password.'
-          : 'Unable to load your profile. Check your internet connection and try again.'
+      googleError.value = 'Unable to prepare your account. Please try again.'
       return
     }
     await redirectAfterLogin(result.user)
-  } catch (error) {
-    switch (error.code) {
-      case 'auth/popup-closed-by-user':
-      case 'auth/cancelled-popup-request':
-        googleError.value = 'Google sign-in was cancelled. You can try again.'
-        break
-      case 'auth/popup-blocked':
-        googleError.value =
-          'Your browser blocked the sign-in popup. Allow popups for SmartLoop and try again.'
-        break
-      case 'auth/account-exists-with-different-credential':
-        googleError.value =
-          'This account uses another sign-in method. Please use your original method, such as email and password.'
-        break
-      case 'auth/too-many-requests':
-        googleError.value = 'Too many attempts. Please try again later.'
-        break
-      case 'auth/network-request-failed':
-        googleError.value = 'Please check your internet connection and try again.'
-        break
-      case 'auth/user-disabled':
-        googleError.value = 'This account has been disabled.'
-        break
-      case 'auth/unauthorized-domain':
-      case 'auth/operation-not-allowed':
-        googleError.value =
-          'Google sign-in is unavailable on this site. Please use email and password.'
-        break
-      default:
-        googleError.value =
-          'Unable to sign in with Google. Please try again or use email and password.'
-    }
+  } catch {
+    googleError.value = 'Unable to sign in with Google. Please try again or use email and password.'
   } finally {
     isLoading.value = false
   }
 }
 
-const submitForm = async () => {
+async function submitForm() {
   if (isLoading.value) return
-  successMessage.value = ''
-  googleError.value = ''
-  errors.email = ''
-  errors.password = ''
-  loginError.value = ''
+  resetMessages()
 
   if (!form.email.trim()) {
     errors.email = 'Email is required.'
@@ -228,32 +191,8 @@ const submitForm = async () => {
   try {
     const result = await signInWithEmailAndPassword(auth, form.email.trim(), form.password)
     await redirectAfterLogin(result.user)
-  } catch (error) {
-    switch (error.code) {
-      case 'auth/invalid-email':
-        errors.email = 'Please enter a valid email address.'
-        break
-
-      case 'auth/invalid-credential':
-        loginError.value = 'Incorrect email or password.'
-        break
-
-      case 'auth/user-disabled':
-        loginError.value = 'This account has been disabled.'
-        break
-
-      case 'auth/too-many-requests':
-        loginError.value = 'Too many attempts. Please try again later.'
-        break
-
-      case 'auth/network-request-failed':
-        loginError.value = 'Please check your internet connection.'
-        break
-
-      default:
-        loginError.value = 'Login failed. Please try again.'
-        console.error(error)
-    }
+  } catch {
+    loginError.value = 'Unable to log in. Check your email and password or try again later.'
   } finally {
     isLoading.value = false
   }

@@ -1,11 +1,11 @@
 <template>
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Manage Recycle &amp; Reuse</h1>
-        <p>Add, edit and manage recycling information.</p>
-      </div>
-    </section>
+    <PageHero
+      :title="'Manage Recycle & Reuse'"
+      :subtitle="'Add, edit and manage recycling information.'"
+      :image="public_hero"
+    />
+
     <section class="container py-5">
       <p v-if="successMessage" class="alert alert-success" role="status">{{ successMessage }}</p>
       <p v-if="actionError" class="alert alert-danger" role="alert">{{ actionError }}</p>
@@ -294,6 +294,8 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { db } from '@/firebase/init'
+import public_hero from '@/assets/images/public_hero.png'
+import PageHero from '@/components/PageHero.vue'
 
 const items = ref([])
 const searchTerm = ref('')
@@ -399,9 +401,8 @@ async function loadItems() {
   try {
     const snapshot = await getDocs(collection(db, 'recycleItems'))
     items.value = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }))
-  } catch (error) {
+  } catch {
     loadError.value = 'Unable to load recycling items. Please try again.'
-    console.error('Unable to load recycling items:', error)
   } finally {
     isLoading.value = false
   }
@@ -492,10 +493,9 @@ async function saveItem() {
     }
     showForm.value = false
     editingId.value = ''
-  } catch (error) {
+  } catch {
     actionError.value =
       'Unable to save the item. Check your connection and admin permissions, then try again.'
-    console.error('Unable to save recycling item:', error)
   } finally {
     isSaving.value = false
     if (!showForm.value) {
@@ -531,10 +531,9 @@ async function deleteItem() {
     items.value = items.value.filter((item) => item.id !== deletingId.value)
     pendingDelete.value = null
     successMessage.value = 'Item deleted.'
-  } catch (error) {
+  } catch {
     actionError.value =
       'Unable to delete the item. Check your connection and admin permissions, then try again.'
-    console.error('Unable to delete recycling item:', error)
   } finally {
     deletingId.value = ''
     await nextTick()

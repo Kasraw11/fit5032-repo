@@ -14,108 +14,83 @@
 
       <template v-if="dataLoaded">
         <h2 class="h4 mb-3">Summary</h2>
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card card-gradient-4 p-4 h-100 shadow-sm">
-              <h3 class="h6 text-body-secondary mb-3">Registered Users</h3>
-              <LoadingIndicator v-if="isLoadingUsers" message="Counting users..." />
-              <div v-else-if="userCountError">
-                <p class="small text-danger" role="alert">{{ userCountError }}</p>
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary btn-sm"
-                  @click="loadUserCount"
-                >
-                  Try Again
-                </button>
-              </div>
-              <p v-else class="display-6 fw-semibold mb-0">{{ userCount }}</p>
+        <div class="summary-grid mb-4">
+          <article class="card card-gradient-4 p-4 shadow-sm">
+            <h3 class="h6 text-body-secondary mb-3">Registered Accounts</h3>
+            <LoadingIndicator v-if="isLoadingUsers" message="Counting users..." />
+            <div v-else-if="userCountError">
+              <p class="small text-danger" role="alert">{{ userCountError }}</p>
+              <button type="button" class="btn btn-outline-secondary btn-sm" @click="loadUserCount">
+                Try Again
+              </button>
             </div>
-          </div>
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card card-gradient-1 p-4 h-100 shadow-sm">
-              <h3 class="h6 text-body-secondary mb-3">Total Events</h3>
-              <p class="display-6 fw-semibold text-primary mb-0">{{ events.length }}</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card card-gradient-2 p-4 h-100 shadow-sm">
-              <h3 class="h6 text-body-secondary mb-3">Total Locations</h3>
-              <p class="display-6 fw-semibold text-success mb-0">{{ locations.length }}</p>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-xl-3">
-            <div class="card card-gradient-3 p-4 h-100 shadow-sm">
-              <h3 class="h6 text-body-secondary mb-3">Recycle Items</h3>
-              <p class="display-6 fw-semibold items-total mb-0">{{ recycleItems.length }}</p>
-            </div>
-          </div>
+            <template v-else>
+              <p class="display-6 fw-semibold mb-2">{{ userCount }}</p>
+              <p class="mb-0">Users: {{ regularUserCount }} · Admins: {{ adminCount }}</p>
+            </template>
+          </article>
+          <article class="card card-gradient-1 p-4 shadow-sm">
+            <h3 class="h6 text-body-secondary mb-3">Total Events</h3>
+            <p class="display-6 fw-semibold text-primary mb-0">{{ events.length }}</p>
+          </article>
+          <article class="card card-gradient-2 p-4 shadow-sm">
+            <h3 class="h6 text-body-secondary mb-3">Total Locations</h3>
+            <p class="display-6 fw-semibold text-success mb-0">{{ locations.length }}</p>
+          </article>
+          <article class="card card-gradient-3 p-4 shadow-sm">
+            <h3 class="h6 text-body-secondary mb-3">Recycle Items</h3>
+            <p class="display-6 fw-semibold items-total mb-0">{{ recycleItems.length }}</p>
+          </article>
         </div>
 
-        <section class="mb-4" aria-labelledby="charts-heading">
-          <h2 id="charts-heading" class="h4 mb-2">Charts</h2>
-          <p class="text-body-secondary mb-4">Compare the number of records in each group.</p>
-          <div class="row g-4">
-            <div class="col-12 col-xl-4">
-              <div class="card p-4 h-100 shadow-sm">
-                <h3 id="test-chart-heading" class="h5 mb-2">saved events by category</h3>
-                <div class="chart-container" role="img" aria-labelledby="test-chart-heading"></div>
-              </div>
+        <h2 id="charts-heading" class="h4 mb-2">Charts</h2>
+        <p class="text-body-secondary mb-4">Compare the number of records in each group.</p>
+        <div class="charts-grid">
+          <article class="card p-4 shadow-sm">
+            <h3 class="h5 mb-2">Events by Category</h3>
+            <p class="small text-body-secondary mb-4">Number of events in each category</p>
+            <p v-if="!events.length" class="text-body-secondary py-5 text-center">
+              No events available.
+            </p>
+            <div v-show="events.length" class="chart-container">
+              <canvas
+                ref="eventsCanvas"
+                role="img"
+                :aria-label="chartDescription(events, 'category', 'Events by category')"
+              ></canvas>
             </div>
-            <div class="col-12 col-xl-4">
-              <div class="card p-4 h-100 shadow-sm">
-                <h3 class="h5 mb-2">Events by Category</h3>
-                <p class="small text-body-secondary mb-4">Number of events in each category</p>
-                <p v-if="!events.length" class="text-body-secondary py-5 text-center">
-                  No events available.
-                </p>
-                <div v-show="events.length" class="chart-container">
-                  <canvas
-                    ref="eventsCanvas"
-                    role="img"
-                    :aria-label="chartDescription(events, 'category', 'Events by category')"
-                  ></canvas>
-                </div>
-              </div>
+          </article>
+          <article class="card p-4 shadow-sm">
+            <h3 class="h5 mb-2">Locations by Type</h3>
+            <p class="small text-body-secondary mb-4">Number of locations in each type</p>
+            <p v-if="!locations.length" class="text-body-secondary py-5 text-center">
+              No locations available.
+            </p>
+            <div v-show="locations.length" class="chart-container">
+              <canvas
+                ref="locationsCanvas"
+                role="img"
+                :aria-label="chartDescription(locations, 'type', 'Locations by type')"
+              ></canvas>
             </div>
-            <div class="col-12 col-xl-4">
-              <div class="card p-4 h-100 shadow-sm">
-                <h3 class="h5 mb-2">Locations by Type</h3>
-                <p class="small text-body-secondary mb-4">Number of locations in each type</p>
-                <p v-if="!locations.length" class="text-body-secondary py-5 text-center">
-                  No locations available.
-                </p>
-                <div v-show="locations.length" class="chart-container">
-                  <canvas
-                    ref="locationsCanvas"
-                    role="img"
-                    :aria-label="chartDescription(locations, 'type', 'Locations by type')"
-                  ></canvas>
-                </div>
-              </div>
+          </article>
+          <article class="card p-4 shadow-sm">
+            <h3 class="h5 mb-2">Recycle Items by Category</h3>
+            <p class="small text-body-secondary mb-4">Number of recycling items in each category</p>
+            <p v-if="!recycleItems.length" class="text-body-secondary py-5 text-center">
+              No recycle items available.
+            </p>
+            <div v-show="recycleItems.length" class="chart-container">
+              <canvas
+                ref="itemsCanvas"
+                role="img"
+                :aria-label="
+                  chartDescription(recycleItems, 'category', 'Recycle items by category')
+                "
+              ></canvas>
             </div>
-            <div class="col-12 col-xl-4">
-              <div class="card p-4 h-100 shadow-sm">
-                <h3 class="h5 mb-2">Recycle Items by Category</h3>
-                <p class="small text-body-secondary mb-4">
-                  Number of recycling items in each category
-                </p>
-                <p v-if="!recycleItems.length" class="text-body-secondary py-5 text-center">
-                  No recycle items available.
-                </p>
-                <div v-show="recycleItems.length" class="chart-container">
-                  <canvas
-                    ref="itemsCanvas"
-                    role="img"
-                    :aria-label="
-                      chartDescription(recycleItems, 'category', 'Recycle items by category')
-                    "
-                  ></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+          </article>
+        </div>
       </template>
     </section>
   </main>
@@ -138,6 +113,8 @@ const isLoading = ref(false)
 const dataLoaded = ref(false)
 const loadError = ref('')
 const userCount = ref(null)
+const regularUserCount = ref(null)
+const adminCount = ref(null)
 const isLoadingUsers = ref(false)
 const userCountError = ref('')
 const eventsCanvas = ref(null)
@@ -163,16 +140,16 @@ async function loadUserCount() {
         timeout: 125000,
       },
     )
-    if (
-      !response.data.success ||
-      !Number.isInteger(response.data.userCount) ||
-      response.data.userCount < 0
-    ) {
-      throw new Error('Invalid user count.')
+    const counts = response.data
+    if (!counts.success) throw new Error('Unable to count users.')
+    for (const count of [counts.userCount, counts.regularUserCount, counts.adminCount]) {
+      if (!Number.isInteger(count) || count < 0) throw new Error('Invalid user count.')
     }
-    userCount.value = response.data.userCount
+    userCount.value = counts.userCount
+    regularUserCount.value = counts.regularUserCount
+    adminCount.value = counts.adminCount
   } catch {
-    userCountError.value = 'Unable to load user count.'
+    userCountError.value = 'Unable to load user and admin counts. Please try again.'
   } finally {
     isLoadingUsers.value = false
   }
@@ -213,21 +190,23 @@ async function loadData() {
 function countGroups(records, field) {
   const labels = []
   const counts = []
-  records.forEach((record) => {
+  for (const record of records) {
     const label = String(record[field] || 'Uncategorized')
     const index = labels.indexOf(label)
     if (index === -1) {
       labels.push(label)
       counts.push(1)
     } else counts[index] += 1
-  })
+  }
   return { labels, counts }
 }
 
 function chartDescription(records, field, title) {
   const groups = countGroups(records, field)
   const descriptions = []
-  groups.labels.forEach((label, index) => descriptions.push(label + ': ' + groups.counts[index]))
+  for (let index = 0; index < groups.labels.length; index++) {
+    descriptions.push(groups.labels[index] + ': ' + groups.counts[index])
+  }
   return title + '. ' + (descriptions.join(', ') || 'No records available.')
 }
 
@@ -270,7 +249,7 @@ function drawChart(canvas, records, field, label, color) {
 }
 
 function destroyCharts() {
-  charts.forEach((chart) => chart.destroy())
+  for (const chart of charts) chart.destroy()
   charts = []
 }
 
@@ -285,6 +264,28 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.summary-grid,
+.charts-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .charts-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .items-total {
   color: #6f42c1;
 }

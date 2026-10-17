@@ -9,21 +9,14 @@
       <FeedbackMessage v-model:message="successMessage" />
       <p v-if="actionError" class="alert alert-danger" role="alert">{{ actionError }}</p>
       <button
-        ref="addButton"
         type="button"
         class="btn btn-primary mb-4"
-        :disabled="isBusy || !!loadError || showForm || !!pendingDelete"
-        @click="startAdd"
+        :disabled="!canOpenForm || !!loadError"
+        @click="openForm()"
       >
         + Add Location or Event
       </button>
-      <form
-        v-if="showForm"
-        ref="formElement"
-        class="card shadow-sm p-4 mb-4"
-        novalidate
-        @submit.prevent="saveItem"
-      >
+      <form v-if="showForm" class="card shadow-sm p-4 mb-4" novalidate @submit.prevent="saveItem">
         <h2 class="h4">{{ editingId ? 'Edit Location or Event' : 'Add Location or Event' }}</h2>
         <fieldset :disabled="isBusy">
           <div class="row g-3">
@@ -37,7 +30,6 @@
                 v-model="form.name"
                 :aria-invalid="!!errors.name"
                 :aria-describedby="errors.name ? 'locations-name-error' : undefined"
-                ref="nameInput"
                 class="form-control"
                 type="text"
               />
@@ -141,18 +133,9 @@
               ><textarea
                 id="locations-description"
                 v-model="form.description"
-                :aria-invalid="!!errors.description"
-                :aria-describedby="errors.description ? 'locations-description-error' : undefined"
                 class="form-control"
                 rows="4"
               ></textarea>
-              <p
-                v-if="errors.description"
-                id="locations-description-error"
-                class="text-danger mt-1 mb-0"
-              >
-                {{ errors.description }}
-              </p>
             </div>
           </div>
           <p class="text-muted mt-3">
@@ -172,7 +155,6 @@
         <p>This permanently removes this location or event from SmartLoop.</p>
         <div class="d-flex gap-2">
           <button
-            ref="cancelDeleteButton"
             type="button"
             class="btn btn-outline-secondary"
             :disabled="isBusy"
@@ -184,13 +166,14 @@
           </button>
         </div>
       </div>
+
+      ///// search filter
       <div class="row mb-4">
         <div class="col-12 col-md-6 mb-3">
           <label for="locations-search" class="form-label">Search locations and events</label>
           <div class="input-group">
             <input
               id="locations-search"
-              ref="searchInput"
               v-model="searchTerm"
               type="search"
               class="form-control"
@@ -200,14 +183,14 @@
               v-if="searchTerm"
               type="button"
               class="btn btn-outline-secondary"
-              @click="clearSearch"
+              @click="resetFilters(false)"
             >
               Clear
             </button>
           </div>
         </div>
         <div class="col-12 col-md-6">
-          <label for="locations-filter" class="form-label">Filter by category</label
+          <label for="locations-filter" class="form-label">Search by category</label
           ><select
             id="locations-filter"
             v-model="selectedFilter"
@@ -230,64 +213,58 @@
         No locations or events yet. Use Add Location or Event to create the first one.
       </p>
       <div v-else class="table-responsive">
-        <table class="table table-striped align-middle">
+        <DataTable
+          :key="searchTerm + '|' + selectedFilter"
+          ref="locationsTable"
+          :data="filteredItems"
+          :columns="tableColumns"
+          :options="tableOptions"
+          class="table table-striped align-middle w-100"
+          @draw="keepPageInRange"
+        >
           <caption>
             Locations and Events
           </caption>
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Category</th>
-              <th scope="col">Address</th>
-              <th scope="col">Date</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="filteredItems.length === 0">
-              <td colspan="5">
-                No locations or events match your search or filter.
-                <button type="button" class="btn btn-link" @click="resetFilters">
-                  Show all locations and events
-                </button>
-              </td>
-            </tr>
-            <tr v-for="item in filteredItems" :key="item.collectionName + '_' + item.id">
-              <td>{{ item.name }}</td>
-              <td>{{ locationCategory(item) }}</td>
-              <td>{{ item.address }}</td>
-              <td>{{ item.date || '—' }}</td>
-              <td>
-                <div class="d-flex gap-2">
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    :disabled="isBusy || showForm || !!pendingDelete"
-                    :aria-label="'Edit ' + item.name"
-                    @click="startEdit(item)"
-                  >
-                    Edit</button
-                  ><button
-                    type="button"
-                    class="btn btn-outline-danger btn-sm"
-                    :disabled="isBusy || showForm || !!pendingDelete"
-                    :aria-label="'Delete ' + item.name"
-                    @click="requestDelete(item)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <template #column-category="{ rowData: item }">
+            {{ locationCategory(item) }}
+          </template>
+          <template #column-actions="{ rowData: item }">
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                :disabled="!canOpenForm"
+                :aria-label="'Edit ' + item.name"
+                @click="openForm(item)"
+              >
+                Edit</button
+              ><button
+                type="button"
+                class="btn btn-outline-danger btn-sm"
+                :disabled="!canOpenForm"
+                :aria-label="'Delete ' + item.name"
+                @click="requestDelete(item)"
+              >
+                Delete
+              </button>
+            </div>
+          </template>
+        </DataTable>
+        <button
+          v-if="filteredItems.length === 0"
+          type="button"
+          class="btn btn-link"
+          @click="resetFilters(true)"
+        >
+          Show all locations and events
+        </button>
       </div>
     </section>
   </main>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import {
   addDoc,
   collection,
@@ -302,6 +279,55 @@ import axios from 'axios'
 import PageHero from '@/components/PageHero.vue'
 import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import public_hero from '@/assets/images/public_hero.png'
+import DataTable from 'datatables.net-vue3'
+import DataTablesCore from 'datatables.net-bs5'
+import 'datatables.net-bs5/css/dataTables.bootstrap5.css'
+
+DataTable.use(DataTablesCore)
+
+const locationsTable = ref(null)
+const tableOptions = {
+  pageLength: 10,
+  lengthChange: false,
+  paging: true,
+  searching: false,
+  ordering: true,
+  order: [[3, 'desc']],
+  layout: { topStart: null, topEnd: null, bottomStart: 'info', bottomEnd: 'paging' },
+  language: { emptyTable: 'No locations or events match your search or filter.' },
+}
+const tableColumns = [
+  {
+    data: 'name',
+    title: 'Name',
+    defaultContent: '',
+    orderable: false,
+    render: DataTablesCore.render.text(),
+  },
+  { data: 'category', title: 'Category', name: 'category', defaultContent: '', orderable: false },
+  {
+    data: 'address',
+    title: 'Address',
+    defaultContent: '',
+    orderable: false,
+    render: DataTablesCore.render.text(),
+  },
+  {
+    data: 'date',
+    title: 'Date',
+    defaultContent: '',
+    type: 'date',
+    render: DataTablesCore.render.text(),
+  },
+  { data: null, title: 'Actions', name: 'actions', defaultContent: '', orderable: false },
+]
+
+function keepPageInRange() {
+  const table = locationsTable.value?.dt
+  if (!table) return
+  const page = table.page.info()
+  if (page.pages > 0 && page.page >= page.pages) table.page('last').draw('page')
+}
 
 const items = ref([])
 const isLoading = ref(false)
@@ -322,13 +348,9 @@ const showForm = ref(false)
 const editingId = ref('')
 const editingCollection = ref('')
 const pendingDelete = ref(null)
+const canOpenForm = computed(() => !isBusy.value && !showForm.value && !pendingDelete.value)
 const searchTerm = ref('')
 const selectedFilter = ref('')
-const nameInput = ref(null)
-const searchInput = ref(null)
-const formElement = ref(null)
-const addButton = ref(null)
-const cancelDeleteButton = ref(null)
 const form = reactive({
   name: '',
   category: '',
@@ -347,6 +369,13 @@ const notificationCategories = [
   'Recycling Centres',
   'Repair Centres',
 ]
+const categoryTypes = {
+  Donations: 'donation',
+  Workshops: 'workshop',
+  Events: 'event',
+  'Recycling Centres': 'recycling',
+  'Repair Centres': 'repair',
+}
 
 const filteredItems = computed(() => {
   const search = searchTerm.value.trim().toLowerCase()
@@ -371,13 +400,9 @@ function locationCategory(item) {
   return 'Recycling Centres'
 }
 
-function clearSearch() {
+function resetFilters(clearCategory) {
   searchTerm.value = ''
-  searchInput.value?.focus()
-}
-function resetFilters() {
-  selectedFilter.value = ''
-  clearSearch()
+  if (clearCategory) selectedFilter.value = ''
 }
 
 async function loadItems() {
@@ -394,9 +419,8 @@ async function loadItems() {
     for (const item of events.docs) {
       items.value.push({ ...item.data(), id: item.id, collectionName: 'events' })
     }
-  } catch (error) {
+  } catch {
     loadError.value = 'Unable to load locations and events. Please try again.'
-    console.error('Unable to load locations:', error)
   } finally {
     isLoading.value = false
   }
@@ -457,16 +481,26 @@ async function findLocation() {
       locationError.value =
         'No matching address found. Include a street, suburb and postcode, then try again.'
     }
-  } catch (error) {
+  } catch {
     locationError.value = 'Unable to find the address. Please try again.'
-    console.error('Address lookup failed:', error.response?.status)
   } finally {
     geocodingController = null
     isFindingLocation.value = false
   }
 }
 
-async function openForm() {
+function openForm(item) {
+  if (!canOpenForm.value || (!item && loadError.value)) return
+  editingId.value = item?.id || ''
+  editingCollection.value = item?.collectionName || ''
+  form.name = item?.name || ''
+  form.category = item ? locationCategory(item) : ''
+  form.address = item?.address || ''
+  form.latitude = item?.location?.latitude ?? ''
+  form.longitude = item?.location?.longitude ?? ''
+  form.description = item?.description || ''
+  form.date = item?.date || ''
+  form.status = item?.status || 'draft'
   addressResults.value = []
   locationError.value = ''
   locationMessage.value = ''
@@ -474,88 +508,32 @@ async function openForm() {
   actionError.value = ''
   successMessage.value = ''
   showForm.value = true
-  await nextTick()
-  nameInput.value?.focus()
 }
-async function startAdd() {
-  if (isBusy.value || loadError.value || showForm.value || pendingDelete.value) return
-  editingId.value = ''
-  editingCollection.value = ''
-  form.name = ''
-  form.category = ''
-  form.address = ''
-  form.latitude = ''
-  form.longitude = ''
-  form.description = ''
-  form.date = ''
-  form.status = 'draft'
-  await openForm()
-}
-async function startEdit(item) {
-  if (isBusy.value || showForm.value || pendingDelete.value) return
-  editingId.value = item.id
-  editingCollection.value = item.collectionName
-  form.name = item.name || ''
-  form.category = locationCategory(item)
-  form.address = item.address || ''
-  form.latitude = item.location?.latitude ?? ''
-  form.longitude = item.location?.longitude ?? ''
-  form.description = item.description || ''
-  form.date = item.date || ''
-  form.status = item.status || 'draft'
-  await openForm()
-}
-async function closeForm() {
+function closeForm() {
   if (isBusy.value) return
   showForm.value = false
   editingId.value = ''
   editingCollection.value = ''
   actionError.value = ''
-  await nextTick()
-  addButton.value?.focus()
 }
 
 function validateForm() {
   for (const field in errors) errors[field] = ''
-  if (!String(form.name).trim()) {
+  if (!form.name.trim()) {
     errors.name = 'Enter a name.'
   }
-  if (!String(form.address).trim()) {
+  if (!form.address.trim()) {
     errors.address = 'Enter an address.'
   }
-  const latitude = Number(form.latitude)
-  const longitude = Number(form.longitude)
-  if (
-    String(form.latitude).trim() === '' ||
-    String(form.longitude).trim() === '' ||
-    !Number.isFinite(latitude) ||
-    !Number.isFinite(longitude) ||
-    latitude < -90 ||
-    latitude > 90 ||
-    longitude < -180 ||
-    longitude > 180
-  ) {
+  if (form.latitude === '' || form.longitude === '') {
     errors.address = 'Click Find Location and choose an address before saving.'
   }
 
-  if (!notificationCategories.includes(form.category)) {
+  if (!form.category) {
     errors.category = 'Choose a notification category.'
   }
   if (editingCollection.value === 'events' && !form.date) {
     errors.date = 'Choose a date for this event.'
-  }
-  if (form.date) {
-    const date = new Date(form.date)
-    if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(form.date) ||
-      !Number.isFinite(date.getTime()) ||
-      date.toISOString().slice(0, 10) !== form.date
-    ) {
-      errors.date = 'Choose a valid event date.'
-    }
-    if (!['draft', 'published', 'cancelled'].includes(form.status)) {
-      errors.date = 'Choose a valid event status.'
-    }
   }
   if (editingCollection.value === 'locations' && form.date) {
     errors.date = 'This is an existing location. Add a new entry for a dated event.'
@@ -568,11 +546,7 @@ function validateForm() {
 
 async function saveItem() {
   if (isBusy.value || !showForm.value) return
-  if (!validateForm()) {
-    await nextTick()
-    formElement.value?.querySelector('[aria-invalid="true"]')?.focus()
-    return
-  }
+  if (!validateForm()) return
   const latitude = Number(form.latitude)
   const longitude = Number(form.longitude)
   isSaving.value = true
@@ -580,13 +554,7 @@ async function saveItem() {
   successMessage.value = ''
   const itemData = {
     name: form.name.trim(),
-    type: {
-      Donations: 'donation',
-      Workshops: 'workshop',
-      Events: 'event',
-      'Recycling Centres': 'recycling',
-      'Repair Centres': 'repair',
-    }[form.category],
+    type: categoryTypes[form.category],
     category: form.category,
     address: form.address.trim(),
     description: form.description.trim(),
@@ -615,33 +583,24 @@ async function saveItem() {
     showForm.value = false
     editingId.value = ''
     editingCollection.value = ''
-  } catch (error) {
+  } catch {
     actionError.value =
       'Unable to save. Check your connection and admin permissions, then try again.'
-    console.error('Unable to save location:', error)
   } finally {
     isSaving.value = false
-    if (!showForm.value) {
-      await nextTick()
-      addButton.value?.focus()
-    }
   }
 }
 
-async function requestDelete(item) {
-  if (isBusy.value || showForm.value || pendingDelete.value) return
+function requestDelete(item) {
+  if (!canOpenForm.value) return
   pendingDelete.value = item
   actionError.value = ''
   successMessage.value = ''
-  await nextTick()
-  cancelDeleteButton.value?.focus()
 }
-async function cancelDelete() {
+function cancelDelete() {
   if (isBusy.value) return
   pendingDelete.value = null
   actionError.value = ''
-  await nextTick()
-  addButton.value?.focus()
 }
 async function deleteItem() {
   if (isBusy.value || !pendingDelete.value) return
@@ -656,15 +615,11 @@ async function deleteItem() {
     )
     pendingDelete.value = null
     successMessage.value = 'Entry deleted.'
-  } catch (error) {
+  } catch {
     actionError.value =
       'Unable to delete the location. Check your connection and admin permissions, then try again.'
-    console.error('Unable to delete location:', error)
   } finally {
     isDeleting.value = false
-    await nextTick()
-    if (pendingDelete.value) cancelDeleteButton.value?.focus()
-    else addButton.value?.focus()
   }
 }
 

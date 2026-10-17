@@ -5,7 +5,31 @@ const sgMail = require('@sendgrid/mail')
 
 admin.initializeApp()
 
-exports.ensureGoogleUserProfile = onCall(
+function sendError(response, status, message) {
+  response.status(status).json({ success: false, message })
+}
+
+async function checkAdminAccess(request, response) {
+  const authorization = request.get('Authorization') || ''
+  let currentUser
+  try {
+    if (!authorization.startsWith('Bearer ')) throw new Error('Missing login token.')
+    currentUser = await admin.auth().verifyIdToken(authorization.slice(7))
+  } catch {
+    sendError(response, 401, 'Authentication required.')
+    return false
+  }
+
+  const profile = await admin.firestore().collection('users').doc(currentUser.uid).get()
+  if (!profile.exists || profile.data().role !== 'admin') {
+    sendError(response, 403, 'Admin access required.')
+    return false
+  }
+  return true
+}
+
+// create a profile after google sign in
+exports.googleUser = onCall(
   {
     region: 'us-central1',
   },
@@ -42,6 +66,7 @@ const senderEmail = defineSecret('SENDER_EMAIL')
 const supportEmail = defineSecret('SUPPORT_EMAIL')
 const mapboxAccessToken = defineString('MAPBOX_ACCESS_TOKEN')
 
+// send contact messages to support
 exports.sendSupportEmail = onRequest(
   {
     secrets: [sendgridApiKey, senderEmail, supportEmail],
@@ -55,17 +80,14 @@ exports.sendSupportEmail = onRequest(
       return
     }
     if (request.method !== 'POST') {
-      response.status(405).json({ success: false, message: 'Use POST.' })
+      sendError(response, 405, 'Use POST.')
       return
     }
 
     const body = request.body || {}
     for (const field of ['name', 'email', 'subject', 'message']) {
       if (typeof body[field] !== 'string' || !body[field].trim()) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to send support email',
-        })
+        sendError(response, 400, 'Unable to send support email')
         return
       }
     }
@@ -81,10 +103,7 @@ exports.sendSupportEmail = onRequest(
       /[\r\n]/.test(subject) ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) {
-      response.status(400).json({
-        success: false,
-        message: 'Unable to send support email',
-      })
+      sendError(response, 400, 'Unable to send support email')
       return
     }
 
@@ -96,19 +115,14 @@ exports.sendSupportEmail = onRequest(
         typeof file.type !== 'string' ||
         typeof file.content !== 'string'
       ) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to send support email',
-          attachmentError: 'Invalid attachment.',
-        })
+        sendError(response, 400, 'Invalid image attachment.')
         return
       }
       const filename = file.filename.toLowerCase()
       const validType =
-        (file.type === 'application/pdf' && filename.endsWith('.pdf')) ||
         (file.type === 'image/png' && filename.endsWith('.png')) ||
         (file.type === 'image/jpeg' && /\.jpe?g$/.test(filename))
-      const maxBytes = 3 * 1024 * 1024
+      const maxImageSize = 3 * 1024 * 1024
       if (
         !validType ||
         !file.filename.trim() ||
@@ -116,36 +130,16 @@ exports.sendSupportEmail = onRequest(
         /[\\/]/.test(file.filename) ||
         !file.content.length
       ) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to send support email',
-          attachmentError: 'Please select a PDF, PNG or JPG file.',
-        })
-        return
-      }
-      if (file.content.length > 4 * Math.ceil(maxBytes / 3)) {
-        response.status(413).json({
-          success: false,
-          message: 'Unable to send support email',
-          attachmentError: 'Attachment must be smaller than 3 MB.',
-        })
+        sendError(response, 400, 'Please select a PNG or JPG image.')
         return
       }
       const bytes = Buffer.from(file.content, 'base64')
-      if (!bytes.length || bytes.toString('base64') !== file.content) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to send support email',
-          attachmentError: 'Invalid attachment.',
-        })
+      if (bytes.length >= maxImageSize) {
+        sendError(response, 413, 'Attachment must be smaller than 3 MB.')
         return
       }
-      if (bytes.length >= maxBytes) {
-        response.status(413).json({
-          success: false,
-          message: 'Unable to send support email',
-          attachmentError: 'Attachment must be smaller than 3 MB.',
-        })
+      if (!bytes.length || bytes.toString('base64') !== file.content) {
+        sendError(response, 400, 'Invalid image attachment.')
         return
       }
       attachment = {
@@ -174,16 +168,13 @@ exports.sendSupportEmail = onRequest(
         success: true,
         message: 'Support email sent successfully',
       })
-    } catch (error) {
-      console.error('Unable to send support email.')
-      response.status(502).json({
-        success: false,
-        message: 'Unable to send support email',
-      })
+    } catch {
+      sendError(response, 502, 'Unable to send support email')
     }
   },
 )
 
+// count registred users and admins separately
 exports.getUserCount = onRequest(
   {
     region: 'us-central1',
@@ -199,56 +190,43 @@ exports.getUserCount = onRequest(
       return
     }
     if (request.method !== 'POST') {
-      response.status(405).json({ success: false, message: 'Use POST.' })
-      return
-    }
-
-    const authorization = request.get('Authorization') || ''
-    if (!authorization.startsWith('Bearer ')) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
-      return
-    }
-    let currentUser
-    try {
-      currentUser = await admin.auth().verifyIdToken(authorization.slice(7))
-    } catch (error) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
+      sendError(response, 405, 'Use POST.')
       return
     }
 
     try {
-      const user = await admin.firestore().collection('users').doc(currentUser.uid).get()
-      if (!user.exists || user.data().role !== 'admin') {
-        response.status(403).json({
-          success: false,
-          message: 'Admin access required.',
-        })
-        return
-      }
+      const allowed = await checkAdminAccess(request, response)
+      if (!allowed) return
+      const database = admin.firestore()
       let userCount = 0
+      let regularUserCount = 0
+      let adminCount = 0
+      const profiles = await database.collection('users').get()
+      const roles = {}
+      for (const profile of profiles.docs) {
+        roles[profile.id] = profile.data().role
+      }
       let nextPage
       do {
         const result = await admin.auth().listUsers(1000, nextPage)
-        userCount += result.users.length
+        for (const account of result.users) {
+          userCount += 1
+          if (roles[account.uid] === 'admin') {
+            adminCount += 1
+          } else {
+            regularUserCount += 1
+          }
+        }
         nextPage = result.pageToken
       } while (nextPage)
-      response.status(200).json({ success: true, userCount })
-    } catch (error) {
-      console.error('Unable to count users.')
-      response.status(500).json({
-        success: false,
-        message: 'Unable to load user count.',
-      })
+      response.status(200).json({ success: true, userCount, regularUserCount, adminCount })
+    } catch {
+      sendError(response, 500, 'Unable to load user count.')
     }
   },
 )
 
+// email subscribers in the category
 exports.sendBulkEmail = onRequest(
   {
     region: 'us-central1',
@@ -264,40 +242,15 @@ exports.sendBulkEmail = onRequest(
       return
     }
     if (request.method !== 'POST') {
-      response.status(405).json({ success: false, message: 'Use POST.' })
-      return
-    }
-
-    const authorization = request.get('Authorization') || ''
-    if (!authorization.startsWith('Bearer ')) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
-      return
-    }
-    let currentUser
-    try {
-      currentUser = await admin.auth().verifyIdToken(authorization.slice(7))
-    } catch (error) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
+      sendError(response, 405, 'Use POST.')
       return
     }
 
     let sentCount = 0
     try {
+      const allowed = await checkAdminAccess(request, response)
+      if (!allowed) return
       const database = admin.firestore()
-      const user = await database.collection('users').doc(currentUser.uid).get()
-      if (!user.exists || user.data().role !== 'admin') {
-        response.status(403).json({
-          success: false,
-          message: 'Admin access required.',
-        })
-        return
-      }
       const body = request.body || {}
       const categories = ['Donations', 'Workshops', 'Events', 'Recycling Centres', 'Repair Centres']
       if (
@@ -310,11 +263,45 @@ exports.sendBulkEmail = onRequest(
         body.message.length > 5000 ||
         /[\r\n]/.test(body.subject)
       ) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to send notification emails.',
-        })
+        sendError(response, 400, 'Unable to send notification emails.')
         return
+      }
+      let attachment
+      if (body.attachment != null) {
+        const file = body.attachment
+        if (
+          typeof file.filename !== 'string' ||
+          typeof file.type !== 'string' ||
+          typeof file.content !== 'string'
+        ) {
+          sendError(response, 400, 'Invalid image attachment.')
+          return
+        }
+        const filename = file.filename.toLowerCase()
+        const isPng = file.type === 'image/png' && filename.endsWith('.png')
+        const isJpg = file.type === 'image/jpeg' && /\.jpe?g$/.test(filename)
+        const bytes = Buffer.from(file.content, 'base64')
+        if (
+          (!isPng && !isJpg) ||
+          !file.filename.trim() ||
+          file.filename.length > 120 ||
+          /[\\/]/.test(file.filename) ||
+          !bytes.length ||
+          bytes.toString('base64') !== file.content
+        ) {
+          sendError(response, 400, 'Invalid image attachment.')
+          return
+        }
+        if (bytes.length >= 3 * 1024 * 1024) {
+          sendError(response, 413, 'Image must be smaller than 3 MB.')
+          return
+        }
+        attachment = {
+          filename: file.filename.trim(),
+          type: file.type,
+          content: file.content,
+          disposition: 'attachment',
+        }
       }
       const snapshot = await database
         .collection('categorySubscriptions')
@@ -333,25 +320,23 @@ exports.sendBulkEmail = onRequest(
           emails.push(address)
       }
       if (!emails.length) {
-        response.status(400).json({
-          success: false,
-          message: 'No subscribers found for this category.',
-        })
+        sendError(response, 400, 'No subscribers found for this category.')
         return
       }
       sgMail.setApiKey(sendgridApiKey.value())
       for (const email of emails) {
-        await sgMail.send({
+        const emailData = {
           to: email,
           from: senderEmail.value(),
           subject: body.subject.trim(),
           text: body.message.trim(),
-        })
+        }
+        if (attachment) emailData.attachments = [attachment]
+        await sgMail.send(emailData)
         sentCount += 1
       }
       response.status(200).json({ success: true, sentCount })
-    } catch (error) {
-      console.error('Unable to send notification emails.')
+    } catch {
       response.status(502).json({
         success: false,
         message: 'Unable to send notification emails.',
@@ -361,6 +346,7 @@ exports.sendBulkEmail = onRequest(
   },
 )
 
+// find map coordinates for an address
 exports.findLocation = onRequest(
   {
     region: 'us-central1',
@@ -375,48 +361,20 @@ exports.findLocation = onRequest(
       return
     }
     if (request.method !== 'POST') {
-      response.status(405).json({ success: false, message: 'Use POST.' })
-      return
-    }
-
-    const authorization = request.get('Authorization') || ''
-    if (!authorization.startsWith('Bearer ')) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
-      return
-    }
-    let currentUser
-    try {
-      currentUser = await admin.auth().verifyIdToken(authorization.slice(7))
-    } catch (error) {
-      response.status(401).json({
-        success: false,
-        message: 'Authentication required.',
-      })
+      sendError(response, 405, 'Use POST.')
       return
     }
 
     try {
-      const user = await admin.firestore().collection('users').doc(currentUser.uid).get()
-      if (!user.exists || user.data().role !== 'admin') {
-        response.status(403).json({
-          success: false,
-          message: 'Admin access required.',
-        })
-        return
-      }
+      const allowed = await checkAdminAccess(request, response)
+      if (!allowed) return
       const body = request.body || {}
       if (
         typeof body.address !== 'string' ||
         body.address.trim().length < 3 ||
         body.address.length > 300
       ) {
-        response.status(400).json({
-          success: false,
-          message: 'Unable to find the address.',
-        })
+        sendError(response, 400, 'Unable to find the address.')
         return
       }
       const parameters = new URLSearchParams({
@@ -463,14 +421,11 @@ exports.findLocation = onRequest(
         }
       }
       response.status(200).json({ success: true, locations })
-    } catch (error) {
-      console.error('Unable to find the address.')
-      response.status(502).json({
-        success: false,
-        message: 'Unable to find the address.',
-      })
+    } catch {
+      sendError(response, 502, 'Unable to find the address.')
     }
   },
 )
 
-exports.getReuseIdeas = require("./reuseIdeas").getReuseIdeas
+// export the reuse ideas function
+exports.getReuseIdeas = require('./reuseIdeas').getReuseIdeas

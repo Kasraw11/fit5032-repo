@@ -267,3 +267,14 @@ body {
   opacity: 0;
   filter: blur(4px);
 }
+
+.selectable-card {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.selectable-card:hover {
+  transform: translateY(-5px);
+}

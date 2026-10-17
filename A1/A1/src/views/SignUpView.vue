@@ -251,14 +251,6 @@ const submitForm = async () => {
         errors.email = 'Please enter a valid email address.'
         break
 
-      case 'auth/weak-password':
-        errors.password = 'This password does not meet Firebase requirements.'
-        break
-
-      case 'auth/network-request-failed':
-        authError.value = 'Please check your internet connection.'
-        break
-
       default:
         authError.value = 'Registration failed. Please try again.'
         console.error(error)

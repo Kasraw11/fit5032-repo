@@ -153,9 +153,9 @@
                 </div>
 
                 <div class="mt-4">
-                  <label :for="`rating-${event.id}`" class="form-label">Rating:</label>
+                  <label :for="'rating-' + event.id" class="form-label">Rating:</label>
                   <select
-                    :id="`rating-${event.id}`"
+                    :id="'rating-' + event.id"
                     v-model="selectedRatings[event.id]"
                     class="form-select mb-3"
                     :disabled="isRatingDisabled(event.id)"
@@ -165,16 +165,14 @@
                       {{ rating }}
                     </option>
                   </select>
-                  <div class="d-flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-primary"
-                      :disabled="isRatingDisabled(event.id)"
-                      @click="submitRating(event.id)"
-                    >
-                      Submit Rating
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    :disabled="isRatingDisabled(event.id)"
+                    @click="submitRating(event.id)"
+                  >
+                    Submit Rating
+                  </button>
                   <p v-if="savingReviews[event.id]" class="mt-3 mb-0" role="status">
                     Saving rating...
                   </p>
@@ -183,10 +181,11 @@
                     v-if="messages[event.id]"
                     class="mt-3 mb-0"
                     role="status"
-                    :class="{
-                      'text-success': messages[event.id] === 'Your rating has been saved.',
-                      'text-danger': messages[event.id] !== 'Your rating has been saved.',
-                    }"
+                    :class="
+                      messages[event.id] === 'Your rating has been saved.'
+                        ? 'text-success'
+                        : 'text-danger'
+                    "
                   >
                     {{ messages[event.id] }}
                   </p>
@@ -290,9 +289,8 @@ async function loadEvents() {
     for (const event of events.value) {
       await loadReviews(event.id)
     }
-  } catch (error) {
+  } catch {
     loadError.value = 'Unable to load events. Please try again.'
-    console.error('Unable to load events:', error)
   } finally {
     isLoading.value = false
   }
@@ -368,9 +366,8 @@ async function loadReviews(eventId) {
       }
     }
     return true
-  } catch (error) {
+  } catch {
     reviewLoadErrors.value[eventId] = 'Unable to load ratings. Please try again.'
-    console.error('Unable to load ratings:', error)
     return false
   } finally {
     loadingReviews.value[eventId] = false
@@ -399,9 +396,8 @@ async function submitRating(eventId) {
     })
     messages.value[eventId] = 'Your rating has been saved.'
     await loadReviews(eventId)
-  } catch (error) {
+  } catch {
     messages.value[eventId] = 'Unable to save your rating.'
-    console.error('Unable to save your rating:', error)
   } finally {
     savingReviews.value[eventId] = false
   }

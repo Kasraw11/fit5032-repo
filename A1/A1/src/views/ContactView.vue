@@ -21,7 +21,6 @@
             :readonly="Boolean(currentUser?.displayName)"
             type="text"
             class="form-control"
-            autocomplete="name"
             maxlength="100"
             :class="{ 'is-invalid': nameError }"
             :aria-describedby="nameError ? 'name-error' : undefined"
@@ -85,21 +84,21 @@
         </div>
 
         <div class="mb-3">
-          <label for="attachment" class="form-label">Attachment (optional)</label>
+          <label for="attachment" class="form-label">Image attachment (optional)</label>
           <input
             id="attachment"
             ref="attachmentInput"
             type="file"
             class="form-control"
-            accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+            accept="image/png,image/jpeg"
             :class="{ 'is-invalid': attachmentError }"
-            :aria-invalid="Boolean(attachmentError)"
+            :aria-invalid="attachmentError !== ''"
             :aria-describedby="
               attachmentError ? 'attachment-help attachment-error' : 'attachment-help'
             "
             @change="chooseAttachment"
           />
-          <p id="attachment-help" class="form-text">One PDF, PNG or JPG file, smaller than 3 MB.</p>
+          <p id="attachment-help" class="form-text">One PNG or JPG image, smaller than 3 MB.</p>
           <p v-if="attachmentError" id="attachment-error" class="text-danger mt-1" role="alert">
             {{ attachmentError }}
           </p>
@@ -113,7 +112,7 @@
           </button>
         </div>
 
-        <button type="submit" class="btn btn-primary" :disabled="isSending">Send Message</button>
+        <button type="submit" class="btn btn-primary">Send Message</button>
       </fieldset>
       <LoadingIndicator v-if="isSending" class="mt-3" message="Sending your message..." />
       <FeedbackMessage v-model:message="successMessage" />
@@ -126,7 +125,6 @@
 import FeedbackMessage from '@/components/FeedbackMessage.vue'
 import { ref, watch } from 'vue'
 import axios from 'axios'
-import { auth } from '@/firebase/init'
 import { currentUser } from '@/authentication'
 import PageHero from '@/components/PageHero.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
@@ -147,15 +145,9 @@ const isSending = ref(false)
 const successMessage = ref('')
 const sendError = ref('')
 
-function fillContactIdentity() {
-  const user = auth.currentUser
-  if (user) {
-    name.value = user.displayName || ''
-    email.value = user.email || ''
-  } else {
-    name.value = ''
-    email.value = ''
-  }
+function fillContactIdentity(user) {
+  name.value = user?.displayName || ''
+  email.value = user?.email || ''
 }
 
 watch(currentUser, fillContactIdentity, { immediate: true })
@@ -164,13 +156,10 @@ function validateAttachment(file) {
   if (!file) return ''
   const filename = file.name.toLowerCase()
   let allowedType = false
-  if (file.type === 'application/pdf' && filename.endsWith('.pdf')) allowedType = true
   if (file.type === 'image/png' && filename.endsWith('.png')) allowedType = true
   if (file.type === 'image/jpeg' && (filename.endsWith('.jpg') || filename.endsWith('.jpeg')))
     allowedType = true
-  if (!allowedType) return 'Please select a PDF, PNG or JPG file.'
-  if (!file.name.trim() || file.name.length > 120 || /[\\/\x00-\x1f\x7f]/.test(file.name))
-    return 'Please use a simple file name of 120 characters or fewer.'
+  if (!allowedType) return 'Please select a PNG or JPG image.'
   if (file.size === 0) return 'Attachment cannot be empty.'
   if (file.size >= 3 * 1024 * 1024) return 'Attachment must be smaller than 3 MB.'
   return ''
@@ -193,8 +182,8 @@ function readAttachment(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(String(reader.result).split(',')[1])
-    reader.onerror = () => reject(new Error('Unable to read attachment.'))
-    reader.onabort = () => reject(new Error('Unable to read attachment.'))
+    reader.onerror = reject
+    reader.onabort = reject
     reader.readAsDataURL(file)
   })
 }
@@ -212,8 +201,6 @@ function validateForm() {
   if (!message.value.trim()) messageError.value = 'Message cannot be empty.'
   if (name.value.trim().length > 100) nameError.value = 'Name must be 100 characters or fewer.'
   if (email.value.trim().length > 254) emailError.value = 'Please enter a valid email.'
-  if (subject.value.trim().length > 200 || /[\r\n]/.test(subject.value))
-    subjectError.value = 'Subject must be one line, with 200 characters or fewer.'
   if (message.value.trim().length > 5000)
     messageError.value = 'Message must be 5000 characters or fewer.'
   attachmentError.value = validateAttachment(attachment.value)
@@ -232,7 +219,7 @@ function validateForm() {
 
 async function submitForm() {
   if (isSending.value) return
-  const user = auth.currentUser
+  const user = currentUser.value
   if (user) {
     email.value = user.email || ''
     if (user.displayName) name.value = user.displayName
@@ -252,13 +239,7 @@ async function submitForm() {
     }
     if (attachment.value) {
       const file = attachment.value
-      let content
-      try {
-        content = await readAttachment(file)
-      } catch {
-        attachmentError.value = 'Unable to read attachment. Please select it again.'
-        return
-      }
+      const content = await readAttachment(file)
       supportMessage.attachment = { filename: file.name, type: file.type, content }
     }
     const response = await axios.post(supportUrl, supportMessage, { timeout: 15000 })
@@ -266,15 +247,8 @@ async function submitForm() {
       throw new Error('Support service returned an unsuccessful response.')
     successMessage.value = response.data.message
     removeAttachment()
-  } catch (error) {
-    const fileError = error.response?.data?.attachmentError
-    if (typeof fileError === 'string') attachmentError.value = fileError
-    if (error.response?.data?.message === 'Unable to send support email') {
-      sendError.value = 'Unable to send support email'
-    } else {
-      sendError.value = 'Unable to connect to support service.'
-    }
-    console.error('Support request failed:', { status: error.response?.status })
+  } catch {
+    sendError.value = 'Unable to send your message. Please try again.'
   } finally {
     isSending.value = false
   }
