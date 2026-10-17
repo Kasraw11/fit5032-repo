@@ -33,7 +33,7 @@
               <h2 id="map-list-heading" class="h5 mb-0">Events &amp; Locations</h2>
             </div>
             <div
-              class="card-body p-3 map-list-body"
+              class="card-body p-3 map-list"
               tabindex="0"
               role="region"
               aria-label="Events and locations list"
@@ -52,9 +52,7 @@
                   {{ type === 'all' ? 'All' : type }}
                 </button>
               </div>
-              <p v-if="!currentUser" class="small">
-                <RouterLink to="/account/login">Sign in</RouterLink> to see events on the map.
-              </p>
+
               <div v-if="!isLoading" aria-label="Events and locations">
                 <p v-if="filteredMapItems.length === 0" class="text-muted mb-0" role="status">
                   No events or locations match this type.
@@ -613,7 +611,7 @@ onUnmounted(closeMap)
   flex-shrink: 0;
 }
 
-.map-list-body {
+.map-list {
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
