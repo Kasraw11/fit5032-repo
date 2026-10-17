@@ -8,29 +8,13 @@
 
     <section class="container py-5">
       <div class="d-flex flex-wrap align-items-end gap-3 mb-4">
-        <fieldset class="mb-0">
-          <legend class="h6">View events as</legend>
-          <div class="btn-group">
-            <input
-              id="events-cards"
-              v-model="viewMode"
-              type="radio"
-              name="event-view"
-              value="cards"
-              class="btn-check"
-            />
-            <label for="events-cards" class="btn btn-outline-primary btn-sm">Cards</label>
-            <input
-              id="events-list"
-              v-model="viewMode"
-              type="radio"
-              name="event-view"
-              value="list"
-              class="btn-check"
-            />
-            <label for="events-list" class="btn btn-outline-primary btn-sm">List</label>
-          </div>
-        </fieldset>
+        <div>
+          <label for="event-view" class="form-label">View events as</label>
+          <select id="event-view" v-model="viewMode" class="form-select form-select-sm">
+            <option value="cards">Cards</option>
+            <option value="list">List</option>
+          </select>
+        </div>
         <div>
           <label for="event-category" class="form-label">Category</label>
           <select
@@ -54,7 +38,7 @@
       </div>
       <p v-else-if="events.length === 0">No events are available yet.</p>
       <p v-else-if="filteredEvents.length === 0" role="status">No events match this category.</p>
-      <div v-else class="row" :class="viewMode === 'list' ? 'g-2 event-list' : 'g-4'">
+      <div v-else class="row" :class="viewMode === 'list' ? 'g-2' : 'g-4'">
         <div
           v-for="event in filteredEvents"
           :key="event.id"
@@ -62,15 +46,24 @@
         >
           <div class="card card-gradient-2 h-100">
             <div class="card-body">
-              <div class="event-summary">
-                <div class="event-heading">
+              <div
+                class="event-summary"
+                :class="
+                  viewMode === 'list'
+                    ? 'd-flex flex-wrap align-items-center justify-content-between gap-3'
+                    : ''
+                "
+              >
+                <div>
                   <h2 class="card-title" :class="viewMode === 'list' ? 'h6 mb-1' : 'h4'">
                     {{ event.name }}
                   </h2>
                   <span v-if="viewMode === 'list'" class="badge bg-primary mb-1">
                     {{ event.category || 'Uncategorised' }}
                   </span>
-                  <p class="card-text"><strong>Date:</strong> {{ formatDate(event.date) }}</p>
+                  <p class="card-text" :class="viewMode === 'list' ? 'small mb-0' : ''">
+                    <strong>Date:</strong> {{ formatDate(event.date) }}
+                  </p>
                 </div>
                 <div v-if="viewMode === 'cards'">
                   <p class="card-text">
@@ -86,7 +79,7 @@
                   >
                   <p v-else class="text-muted">Map location not available yet.</p>
                 </div>
-                <div class="event-buttons d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2">
                   <button
                     v-if="viewMode === 'list'"
                     type="button"
@@ -113,6 +106,7 @@
                 v-show="viewMode === 'cards' || expandedEventId === event.id"
                 :id="'event-details-' + event.id"
                 class="event-interactions"
+                :class="viewMode === 'list' ? 'mt-3 pt-3 border-top' : ''"
               >
                 <div v-if="viewMode === 'list'" class="mb-3">
                   <p v-if="event.category"><strong>Category:</strong> {{ event.category }}</p>
@@ -445,28 +439,5 @@ onMounted(loadEvents)
 .event-interactions {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.event-list .card-body {
-  padding: 0.85rem 1rem;
-}
-
-.event-list .event-summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.event-list .event-heading p {
-  margin-bottom: 0;
-  font-size: 0.875rem;
-}
-
-.event-list .event-interactions {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #d9e2ea;
 }
 </style>

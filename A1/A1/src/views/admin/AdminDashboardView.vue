@@ -8,61 +8,65 @@
     <section class="container py-5">
       <div class="row g-4">
         <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
+          <RouterLink
+            to="/admin/locations"
+            class="card h-100 p-3 selectable-card card-gradient-5 text-body text-decoration-none"
+          >
+            <div class="card-body text-center p-4">
               <h3 class="h4">Manage Locations</h3>
-              <p>Manage locations and events, including their descriptions and event dates.</p>
-              <RouterLink class="btn btn-primary" to="/admin/locations"
-                >Manage Locations</RouterLink
-              >
+              <p>
+                <br />Manage locations and events, including their descriptions and event dates.
+              </p>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
+          <RouterLink
+            to="/admin/recycle-reuse"
+            class="card h-100 p-3 selectable-card card-gradient-5 text-body text-decoration-none"
+          >
+            <div class="card-body text-center p-4">
               <h3 class="h4">Manage Recycle &amp; Reuse</h3>
-              <p>Manage recycling information for household items.</p>
-              <RouterLink class="btn btn-primary" to="/admin/recycle-reuse"
-                >Manage Recycle &amp; Reuse</RouterLink
-              >
+              <p><br />Manage recycling information for household items.</p>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
+          <RouterLink
+            to="/admin/stats"
+            class="card h-100 p-3 selectable-card card-gradient-5 text-body text-decoration-none"
+          >
+            <div class="card-body text-center p-4">
               <h3 class="h4">Stats &amp; Charts</h3>
-              <p>View statistics and data visualisation.</p>
-              <RouterLink class="btn btn-primary" to="/admin/stats">Stats &amp; Charts</RouterLink>
+              <p><br />View statistics and data visualisation.</p>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
+          <RouterLink
+            to="/admin/reports"
+            class="card h-100 p-3 selectable-card card-gradient-5 text-body text-decoration-none"
+          >
+            <div class="card-body text-center p-4">
               <h3 class="h4">Reports &amp; Export</h3>
-              <p>View, search and export SmartLoop data.</p>
-              <RouterLink class="btn btn-primary" to="/admin/reports"
-                >Reports &amp; Export</RouterLink
-              >
+              <p><br />View, search and export SmartLoop data.</p>
             </div>
-          </div>
+          </RouterLink>
         </div>
 
         <div class="col-12 col-md-6">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body p-4">
+          <RouterLink
+            to="/admin/notifications"
+            class="card h-100 p-3 selectable-card card-gradient-5 text-body text-decoration-none"
+          >
+            <div class="card-body text-center p-4">
               <h3 class="h4">Notify Users</h3>
-              <p>Send notifications to SmartLoop users.</p>
-              <RouterLink class="btn btn-primary" to="/admin/notifications"
-                >Notify Users</RouterLink
-              >
+              <p><br />Send notifications to SmartLoop users.</p>
             </div>
-          </div>
+          </RouterLink>
         </div>
       </div>
     </section>

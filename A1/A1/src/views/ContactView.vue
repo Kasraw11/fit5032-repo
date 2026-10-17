@@ -20,6 +20,7 @@
             v-model="name"
             :readonly="Boolean(currentUser?.displayName)"
             type="text"
+            autocomplete="name"
             class="form-control"
             maxlength="100"
             :class="{ 'is-invalid': nameError }"
@@ -29,11 +30,10 @@
           <p v-if="nameError" id="name-error" class="text-danger mt-1">{{ nameError }}</p>
         </div>
         <div class="mb-3">
-          <label for="contact-email" class="form-label">Email</label>
+          <label for="contact-email" class="form-label">Contact email</label>
           <input
             id="contact-email"
             v-model="email"
-            :readonly="Boolean(currentUser)"
             type="email"
             class="form-control"
             autocomplete="email"
@@ -58,6 +58,7 @@
             <option value="Support">Support</option>
             <option value="Suggest">Suggest</option>
             <option value="Question">Question</option>
+            <option value="other">Other</option>
           </select>
           <p v-if="subjectError" id="subject-error" class="text-danger mt-1">
             {{ subjectError }}
@@ -145,12 +146,13 @@ const isSending = ref(false)
 const successMessage = ref('')
 const sendError = ref('')
 
-function fillContactIdentity(user) {
-  name.value = user?.displayName || ''
-  email.value = user?.email || ''
-}
-
-watch(currentUser, fillContactIdentity, { immediate: true })
+watch(
+  currentUser,
+  (user) => {
+    name.value = user?.displayName || ''
+  },
+  { immediate: true },
+)
 
 function validateAttachment(file) {
   if (!file) return ''
@@ -196,10 +198,10 @@ function validateForm() {
   if (!name.value.trim()) nameError.value = 'Name cannot be empty.'
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))
     emailError.value = 'Please enter a valid email.'
-  if (!['Support', 'Suggest', 'Question'].includes(subject.value))
+  if (!['Support', 'Suggest', 'Question', 'other'].includes(subject.value))
     subjectError.value = 'Please select a subject.'
   if (!message.value.trim()) messageError.value = 'Message cannot be empty.'
-  if (name.value.trim().length > 100) nameError.value = 'Name must be 100 characters or fewer.'
+  if (name.value.trim().length > 100) nameError.value = 'Name must be 100 characters or less'
   if (email.value.trim().length > 254) emailError.value = 'Please enter a valid email.'
   if (message.value.trim().length > 5000)
     messageError.value = 'Message must be 5000 characters or fewer.'
@@ -219,11 +221,6 @@ function validateForm() {
 
 async function submitForm() {
   if (isSending.value) return
-  const user = currentUser.value
-  if (user) {
-    email.value = user.email || ''
-    if (user.displayName) name.value = user.displayName
-  }
   successMessage.value = ''
   sendError.value = ''
   if (!validateForm()) return

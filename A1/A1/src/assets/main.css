@@ -197,6 +197,11 @@ body {
   box-shadow: 0 4px 14px rgba(23, 78, 131, 0.12) !important;
 }
 
+.card-gradient-8 {
+  background: linear-gradient(135deg, #edf7ff, #e3f5ed);
+  border-color: #b9d9d0;
+}
+
 @media (max-width: 576px) {
   .home-hero {
     min-height: 420px;
@@ -266,6 +271,27 @@ body {
 .page-leave-to {
   opacity: 0;
   filter: blur(4px);
+}
+
+.skip-to-content {
+  position: fixed;
+  top: 0.5rem;
+  left: -9999px;
+  z-index: 1100;
+  padding: 0.75rem 1rem;
+  background: white;
+  color: #17365d;
+}
+
+.skip-to-content:focus {
+  left: 0.5rem;
+}
+
+.table-responsive:focus-visible,
+.map-list-body:focus,
+.selectable-card:focus {
+  outline: 3px solid #0d6efd;
+  outline-offset: 3px;
 }
 
 .selectable-card {

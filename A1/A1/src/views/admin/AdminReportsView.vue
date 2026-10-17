@@ -65,7 +65,7 @@
               </select>
             </div>
           </div>
-          <div class="table-responsive">
+          <div class="table-responsive" tabindex="0" role="region" aria-label="Report table">
             <DataTable
               :key="isEventsReport ? 'events' : 'items'"
               ref="reportTable"

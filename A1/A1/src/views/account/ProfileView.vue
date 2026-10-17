@@ -18,7 +18,13 @@
           <form v-if="isEditing" @submit.prevent="saveName">
             <div class="mb-3 name-field">
               <label for="profileName" class="form-label"><strong>Name</strong></label>
-              <input id="profileName" v-model="name" type="text" class="form-control" />
+              <input
+                id="profileName"
+                v-model="name"
+                type="text"
+                autocomplete="name"
+                class="form-control"
+              />
               <p v-if="nameError" class="text-danger mt-1 mb-0">
                 {{ nameError }}
               </p>

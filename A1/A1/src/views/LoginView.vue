@@ -18,6 +18,7 @@
                   id="email"
                   v-model="form.email"
                   type="email"
+                  autocomplete="email"
                   class="form-control"
                   :disabled="isLoading"
                 />
@@ -33,6 +34,7 @@
                   id="password"
                   v-model="form.password"
                   type="password"
+                  autocomplete="current-password"
                   class="form-control"
                   :disabled="isLoading"
                 />
@@ -56,7 +58,14 @@
                 :disabled="isLoading"
                 @click="signInWithGoogle"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 48 48"
+                  width="24"
+                  height="24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
                   <path
                     fill="#4285F4"
                     d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.17v5.12h6.61c3.87-3.57 6.08-8.83 6.08-14.79z"

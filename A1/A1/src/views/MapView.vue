@@ -32,7 +32,12 @@
             <div class="card-header card-gradient-1 p-3">
               <h2 id="map-list-heading" class="h5 mb-0">Events &amp; Locations</h2>
             </div>
-            <div class="card-body p-3 map-list-body">
+            <div
+              class="card-body p-3 map-list-body"
+              tabindex="0"
+              role="region"
+              aria-label="Events and locations list"
+            >
               <p class="small text-muted">Choose a type, then select an event or location.</p>
               <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="Filter by type">
                 <button
@@ -72,7 +77,6 @@
                   <button
                     type="button"
                     class="btn btn-outline-primary btn-sm"
-                    :aria-label="'Show details for ' + (entry.item.name || 'location')"
                     @click="showMapItem(entry)"
                   >
                     {{ hasValidLocation(entry.item) ? 'View on map' : 'View details' }}

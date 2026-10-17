@@ -49,14 +49,18 @@
       <p v-else-if="filteredItems.length === 0">No items found.</p>
       <div v-else class="row">
         <div v-for="item in filteredItems" :key="item.id" class="col-12 col-md-3 mb-4">
-          <div
-            class="card h-100 p-3 selectable-card card-gradient-1"
-            data-bs-toggle="modal"
-            data-bs-target="#itemDetailsModal"
-            @click="selectItem(item)"
-          >
+          <div class="card h-100 p-3 selectable-card card-gradient-1">
             <h2 class="h5">
-              {{ item.name }}
+              <button
+                type="button"
+                class="stretched-link text-start text-reset bg-transparent border-0 p-0"
+                style="font: inherit"
+                data-bs-toggle="modal"
+                data-bs-target="#itemDetailsModal"
+                @click="selectItem(item)"
+              >
+                {{ item.name }}
+              </button>
             </h2>
 
             <p>

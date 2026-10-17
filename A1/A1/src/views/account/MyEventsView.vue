@@ -55,7 +55,7 @@
             <button
               type="button"
               class="btn btn-outline-danger btn-sm mt-2 align-self-start"
-              :aria-label="'Remove ' + event.name + ' from saved events'"
+              :aria-label="'Remove saved event: ' + event.name"
               @click="removeSavedEvent(event.id)"
             >
               Remove saved event

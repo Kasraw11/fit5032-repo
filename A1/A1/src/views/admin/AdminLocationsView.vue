@@ -212,7 +212,13 @@
       <p v-else-if="items.length === 0">
         No locations or events yet. Use Add Location or Event to create the first one.
       </p>
-      <div v-else class="table-responsive">
+      <div
+        v-else
+        class="table-responsive"
+        tabindex="0"
+        role="region"
+        aria-label="Locations and events table"
+      >
         <DataTable
           :key="searchTerm + '|' + selectedFilter"
           ref="locationsTable"

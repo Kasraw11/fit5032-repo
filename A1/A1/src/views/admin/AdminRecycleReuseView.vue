@@ -193,7 +193,13 @@
       <p v-else-if="items.length === 0">
         No recycling items yet. Use Add Item to create the first one.
       </p>
-      <div v-else class="table-responsive">
+      <div
+        v-else
+        class="table-responsive"
+        tabindex="0"
+        role="region"
+        aria-label="Recycling items table"
+      >
         <table class="table table-striped align-middle">
           <caption>
             Recycling items
