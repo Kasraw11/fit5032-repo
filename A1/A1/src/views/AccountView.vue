@@ -17,36 +17,12 @@
         <div class="row">
           <div class="col-12 col-md-6 mb-4">
             <RouterLink
-              to="/account/upcoming-events"
-              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
-            >
-              <div class="card-body text-center p-4">
-                <h2 class="h5">Upcoming Events</h2>
-                <p>View events that are coming up.</p>
-              </div>
-            </RouterLink>
-          </div>
-
-          <div class="col-12 col-md-6 mb-4">
-            <RouterLink
-              to="/account/event-history"
-              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
-            >
-              <div class="card-body text-center p-4">
-                <h2 class="h5">Event History</h2>
-                <p>View events you attended in the past.</p>
-              </div>
-            </RouterLink>
-          </div>
-
-          <div class="col-12 col-md-6 mb-4">
-            <RouterLink
               to="/account/my-events"
               class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
             >
               <div class="card-body text-center p-4">
-                <h2 class="h5">Saved Events</h2>
-                <p>View events you saved for later.</p>
+                <h2 class="h5">Manage Events</h2>
+                <p>View and manage your events</p>
               </div>
             </RouterLink>
           </div>

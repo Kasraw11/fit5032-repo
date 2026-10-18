@@ -11,18 +11,8 @@
       </aside>
 
       <section class="col-12 col-md-6">
-        <div class="card card-gradient-1 shadow-sm mb-4 py-3">
-          <h2 class="h5 p-1">Upcoming Events</h2>
-          <p class="mb-0">Your upcoming events will appear here.</p>
-        </div>
-
-        <div class="card card-gradient-1 shadow-sm mb-4 py-3">
-          <h2 class="h5 p-1">Event History</h2>
-          <p class="mb-0">Events you attended in the past will appear here.</p>
-        </div>
-
-        <div class="card card-gradient-1 shadow-sm mb-4 py-3">
-          <h2 ref="savedEventsHeading" class="h5 p-1" tabindex="-1">Saved Events</h2>
+        <div class="card card-gradient-2 shadow-sm mb-4 py-3">
+          <h2 ref="savedEventsHeading" class="h5 p-1" tabindex="-1">Manage Events</h2>
           <FeedbackMessage v-model:message="savedEventMessage" />
           <FeedbackMessage v-model:message="savedEventError" type="error" />
 
@@ -31,7 +21,7 @@
           <div
             v-for="event in savedEvents"
             :key="event.id"
-            class="card card-gradient-7 shadow-sm mb-4 py-3"
+            class="card card-gradient-7 shadow-sm mb-4 py-3 px-4"
           >
             <h3 class="h6">{{ event.name }}</h3>
             <p><strong>Date:</strong> {{ event.date }}</p>
