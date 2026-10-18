@@ -147,6 +147,9 @@
                 </div>
 
                 <div class="mt-4">
+                  <p v-if="!isAvailableRate(event.id)" class="text-muted small">
+                    unable to rate this event yet. You can only rate events dated before today.
+                  </p>
                   <label :for="'rating-' + event.id" class="form-label">Rating:</label>
                   <select
                     :id="'rating-' + event.id"
@@ -251,8 +254,21 @@ function closeDetails() {
   expandedEventId.value = ''
 }
 
+function isAvailableRate(eventId) {
+  const event = events.value.find((event) => event.id === eventId)
+  if (!event || !event.date) return false
+
+  let eventDate = event.date.toDate ? event.date.toDate() : new Date(event.date)
+  if (Number.isNaN(eventDate.getTime())) return false
+
+  eventDate = eventDate.toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' })
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' })
+  return eventDate < today
+}
+
 function isRatingDisabled(eventId) {
   if (!currentUser.value) return true
+  if (!isAvailableRate(eventId)) return true
   if (loadingReviews.value[eventId]) return true
   if (savingReviews.value[eventId]) return true
   if (reviewLoadErrors.value[eventId]) return true
@@ -374,6 +390,10 @@ async function submitRating(eventId) {
   const user = currentUser.value
   if (!user) {
     messages.value[eventId] = 'You must be signed in to submit a rating.'
+    return
+  }
+  if (!isAvailableRate(eventId)) {
+    messages.value[eventId] = 'You can only rate events dated before today.'
     return
   }
   const rating = Number(selectedRatings.value[eventId])
