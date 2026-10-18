@@ -18,7 +18,7 @@
           <div class="col-12 col-md-6 mb-4">
             <RouterLink
               to="/account/my-events"
-              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
+              class="card h-100 p-3 selectable-card card-gradient-1 text-body text-decoration-none"
             >
               <div class="card-body text-center p-4">
                 <h2 class="h5">Manage Events</h2>
@@ -30,7 +30,7 @@
           <div class="col-12 col-md-6 mb-4">
             <RouterLink
               to="/account/profile"
-              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
+              class="card h-100 p-3 selectable-card card-gradient-1 text-body text-decoration-none"
             >
               <div class="card-body text-center p-4">
                 <h2 class="h5">Manage Profile</h2>
@@ -42,7 +42,7 @@
           <div class="col-12 col-md-6 mb-4">
             <RouterLink
               to="/account/reports"
-              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
+              class="card h-100 p-3 selectable-card card-gradient-1 text-body text-decoration-none"
             >
               <div class="card-body text-center p-4">
                 <h2 class="h5">Reports &amp; Export</h2>
