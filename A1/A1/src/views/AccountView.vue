@@ -26,6 +26,19 @@
               </div>
             </RouterLink>
           </div>
+
+          <div class="col-12 col-md-6 mb-4">
+            <RouterLink
+              to="/account/profile"
+              class="card h-100 p-3 selectable-card card-gradient-8 text-body text-decoration-none"
+            >
+              <div class="card-body text-center p-4">
+                <h2 class="h5">Manage Profile</h2>
+                <p>Update your personal information and preferences</p>
+              </div>
+            </RouterLink>
+          </div>
+
           <div class="col-12 col-md-6 mb-4">
             <RouterLink
               to="/account/reports"
