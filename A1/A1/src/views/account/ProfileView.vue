@@ -32,6 +32,7 @@
           </form>
 
           <p v-else><strong>Name:</strong> {{ currentUser?.displayName || 'User' }}</p>
+          <p><strong>Email:</strong> {{ currentUser?.email || 'Not available' }}</p>
 
           <FeedbackMessage v-model:message="successMessage" />
 
