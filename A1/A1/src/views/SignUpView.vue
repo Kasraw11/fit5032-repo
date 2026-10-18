@@ -109,7 +109,9 @@
 
             <p class="mt-3">
               have an account?
-              <RouterLink to="account/login">Login</RouterLink>
+              <RouterLink to="account/login">
+                <button class="btn btn-outline-primary">Login</button>
+              </RouterLink>
             </p>
           </form>
         </div>

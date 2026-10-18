@@ -167,7 +167,6 @@
         </div>
       </div>
 
-      ///// search filter
       <div class="row mb-4">
         <div class="col-12 col-md-6 mb-3">
           <label for="locations-search" class="form-label">Search locations and events</label>

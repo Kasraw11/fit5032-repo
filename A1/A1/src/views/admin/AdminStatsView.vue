@@ -47,33 +47,24 @@
         <p class="text-body-secondary mb-4">Compare the number of records in each group.</p>
         <div class="charts-grid">
           <article class="card p-4 shadow-sm">
-            <h3 class="h5 mb-2">Events by Category</h3>
-            <p class="small text-body-secondary mb-4">Number of events in each category</p>
-            <p v-if="!events.length" class="text-body-secondary py-5 text-center">
-              No events available.
+            <h3 class="h5 mb-2">Events &amp; Locations by Category</h3>
+            <p class="small text-body-secondary mb-4">
+              Number of events and locations in each category
             </p>
-            <div v-show="events.length" class="chart-container">
+            <p v-if="!values.length" class="text-body-secondary py-5 text-center">
+              No events or locations available.
+            </p>
+            <div v-show="values.length" class="chart-container">
               <canvas
-                ref="eventsCanvas"
+                ref="entriesCanvas"
                 role="img"
-                :aria-label="chartDescription(events, 'category', 'Events by category')"
+                :aria-label="
+                  chartDescription(values, 'category', 'Events and locations by category')
+                "
               ></canvas>
             </div>
           </article>
-          <article class="card p-4 shadow-sm">
-            <h3 class="h5 mb-2">Locations by Type</h3>
-            <p class="small text-body-secondary mb-4">Number of locations in each type</p>
-            <p v-if="!locations.length" class="text-body-secondary py-5 text-center">
-              No locations available.
-            </p>
-            <div v-show="locations.length" class="chart-container">
-              <canvas
-                ref="locationsCanvas"
-                role="img"
-                :aria-label="chartDescription(locations, 'type', 'Locations by type')"
-              ></canvas>
-            </div>
-          </article>
+
           <article class="card p-4 shadow-sm">
             <h3 class="h5 mb-2">Recycle Items by Category</h3>
             <p class="small text-body-secondary mb-4">Number of recycling items in each category</p>
@@ -97,7 +88,7 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, nextTick, onMounted, onBeforeUnmount, ref } from 'vue'
 import { collection, getDocs } from 'firebase/firestore'
 import { auth, db } from '@/firebase/init'
 import axios from 'axios'
@@ -108,6 +99,7 @@ import public_hero from '@/assets/images/public_hero.png'
 
 const events = ref([])
 const locations = ref([])
+const values = computed(() => [...events.value, ...locations.value])
 const recycleItems = ref([])
 const isLoading = ref(false)
 const dataLoaded = ref(false)
@@ -117,8 +109,7 @@ const regularUserCount = ref(null)
 const adminCount = ref(null)
 const isLoadingUsers = ref(false)
 const userCountError = ref('')
-const eventsCanvas = ref(null)
-const locationsCanvas = ref(null)
+const entriesCanvas = ref(null)
 const itemsCanvas = ref(null)
 let charts = []
 let pageClosed = false
@@ -175,13 +166,12 @@ async function loadData() {
     dataLoaded.value = true
     await nextTick()
     if (pageClosed) return
-    drawChart(eventsCanvas.value, events.value, 'category', 'Events', '#0d6efd')
-    drawChart(locationsCanvas.value, locations.value, 'type', 'Locations', '#198754')
+    drawChart(entriesCanvas.value, values.value, 'category', 'Events & Locations', '#0d6efd')
     drawChart(itemsCanvas.value, recycleItems.value, 'category', 'Recycle items', '#6f42c1')
   } catch {
     dataLoaded.value = false
     destroyCharts()
-    loadError.value = 'Unable to load chart data. Check your connection and try again.'
+    loadError.value = 'Unable to load chart data.'
   } finally {
     isLoading.value = false
   }
@@ -282,7 +272,7 @@ onBeforeUnmount(() => {
   }
 
   .charts-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -292,6 +282,6 @@ onBeforeUnmount(() => {
 
 .chart-container {
   position: relative;
-  height: 280px;
+  height: 300px;
 }
 </style>
